@@ -46,27 +46,26 @@ export default function NpcPanel() {
         NPC — {npc.name}
       </div>
       <div className="panel-content space-y-3">
-        {/* Portrait Placeholder */}
+        {/* NPC Portrait */}
         <div
-          className="w-full aspect-square rounded-lg flex items-center justify-center"
+          className="w-full aspect-square rounded-lg relative overflow-hidden"
           style={{
-            background:
-              "linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-deep) 100%)",
             border: "2px solid var(--color-border)",
             boxShadow:
               "0 0 20px var(--color-gold-glow), inset 0 0 30px rgba(0,0,0,0.5)",
           }}
         >
-          <div className="text-center">
-            <User
-              size={48}
-              className="mx-auto mb-2"
-              style={{ color: "var(--color-text-muted)" }}
-            />
-            <span className="text-[0.65rem] text-[var(--color-text-muted)]">
-              Portrait
-            </span>
-          </div>
+          <img
+            src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80"
+            alt={`Portrait of ${npc.name}`}
+            className="w-full h-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(180deg, transparent 50%, rgba(13,8,20,0.7) 100%)",
+            }}
+          />
         </div>
 
         {/* Name & Status */}

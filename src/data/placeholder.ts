@@ -15,12 +15,12 @@ export const playerCharacter = {
   speed: 30,
   proficiencyBonus: 3,
   stats: {
-    STR: { score: 10, mod: 0 },
-    DEX: { score: 18, mod: 4 },
-    CON: { score: 12, mod: 1 },
-    INT: { score: 14, mod: 2 },
-    WIS: { score: 13, mod: 1 },
-    CHA: { score: 16, mod: 3 },
+    STR: { score: 10, mod: 0, base: 10, modifiers: [{ source: "Base", value: 10 }] },
+    DEX: { score: 18, mod: 4, base: 15, modifiers: [{ source: "Base", value: 15 }, { source: "Half-Elf Racial", value: 1 }, { source: "ASI (Level 4)", value: 2 }] },
+    CON: { score: 12, mod: 1, base: 12, modifiers: [{ source: "Base", value: 12 }] },
+    INT: { score: 14, mod: 2, base: 13, modifiers: [{ source: "Base", value: 13 }, { source: "Half-Elf Racial", value: 1 }] },
+    WIS: { score: 13, mod: 1, base: 13, modifiers: [{ source: "Base", value: 13 }] },
+    CHA: { score: 16, mod: 3, base: 14, modifiers: [{ source: "Base", value: 14 }, { source: "Half-Elf Racial", value: 2 }] },
   },
   skills: [
     { name: "Acrobatics", ability: "DEX", proficient: true, expertise: false, mod: 7 },
@@ -42,17 +42,88 @@ export const playerCharacter = {
     DEX: { proficient: true, mod: 7 },
     INT: { proficient: true, mod: 5 },
   },
+  abilities: [
+    { name: "Sneak Attack", source: "Rogue 1", description: "Deal an extra 3d6 damage to one creature you hit with an attack if you have advantage.", uses: null },
+    { name: "Cunning Action", source: "Rogue 2", description: "Dash, Disengage, or Hide as a bonus action on each turn.", uses: null },
+    { name: "Uncanny Dodge", source: "Rogue 5", description: "When hit by an attack, use reaction to halve the damage.", uses: null },
+    { name: "Evasion", source: "Rogue 7", description: "On a successful DEX save, take no damage instead of half.", uses: null },
+    { name: "Amulet of the Veil", source: "Item", description: "Become invisible for 1 minute.", uses: { current: 1, max: 1, recharge: "Long Rest" } },
+  ],
+  statusEffects: [
+    { name: "Cloak of Elvenkind", type: "buff" as const, description: "Advantage on Stealth checks. Others have disadvantage on Perception to spot you.", duration: "Passive (while worn)", icon: "eye-off" },
+    { name: "Darkvision", type: "buff" as const, description: "See in dim light within 60 feet as if it were bright light.", duration: "Passive (racial)", icon: "eye" },
+  ],
 };
 
-export const inventory = [
-  { id: "inv-001", name: "Rapier +1", type: "weapon", equipped: true, quantity: 1, rarity: "uncommon", description: "A finely crafted blade with a faint magical shimmer" },
-  { id: "inv-002", name: "Leather Armor", type: "armor", equipped: true, quantity: 1, rarity: "common", description: "Supple dark leather, well-maintained" },
-  { id: "inv-003", name: "Thieves' Tools", type: "tool", equipped: false, quantity: 1, rarity: "common", description: "A set of lockpicks and probes" },
-  { id: "inv-004", name: "Healing Potion", type: "consumable", equipped: false, quantity: 3, rarity: "common", description: "Restores 2d4+2 HP" },
-  { id: "inv-005", name: "Cloak of Elvenkind", type: "wondrous", equipped: true, quantity: 1, rarity: "uncommon", description: "Advantage on Stealth checks" },
-  { id: "inv-006", name: "Rations", type: "consumable", equipped: false, quantity: 8, rarity: "common", description: "One day's worth of food" },
-  { id: "inv-007", name: "Rope (50 ft)", type: "gear", equipped: false, quantity: 1, rarity: "common", description: "Hempen rope" },
-  { id: "inv-008", name: "Amulet of the Veil", type: "wondrous", equipped: true, quantity: 1, rarity: "rare", description: "Once per day, become invisible for 1 minute" },
+export const inventory: {
+  id: string; name: string; type: string; equipped: boolean; quantity: number; rarity: string;
+  slots: string[]; description: string; image: string; effects: string[];
+  attributes: Record<string, string>;
+}[] = [
+  {
+    id: "inv-001", name: "Rapier +1", type: "weapon", equipped: true, quantity: 1, rarity: "uncommon",
+    slots: ["Main Hand", "Off Hand"],
+    description: "A finely crafted blade with a faint magical shimmer. The hilt is wrapped in dark leather with a silver crossguard etched with elven script.",
+    image: "https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=600&q=80",
+    effects: ["+1 to attack and damage rolls", "Finesse — use DEX modifier"],
+    attributes: { damage: "1d8+1 piercing", weight: "2 lb", properties: "Finesse, Light" },
+  },
+  {
+    id: "inv-002", name: "Leather Armor", type: "armor", equipped: true, quantity: 1, rarity: "common",
+    slots: ["Armor"],
+    description: "Supple dark leather, well-maintained and oiled. Dyed black with subtle reinforcement at the shoulders and chest.",
+    image: "https://images.unsplash.com/photo-1531746790095-e5995edb1b5b?w=600&q=80",
+    effects: ["AC = 11 + DEX modifier"],
+    attributes: { ac: "11 + DEX", weight: "10 lb", properties: "Light armor" },
+  },
+  {
+    id: "inv-003", name: "Thieves' Tools", type: "tool", equipped: false, quantity: 1, rarity: "common",
+    slots: [],
+    description: "A small leather case containing a set of lockpicks, a small mirror on a metal handle, narrow-bladed scissors, and a pair of pliers.",
+    image: "https://images.unsplash.com/photo-1567361672830-b1b4e8261598?w=600&q=80",
+    effects: ["Required for picking locks", "Add proficiency bonus to checks"],
+    attributes: { weight: "1 lb", proficiency: "Yes" },
+  },
+  {
+    id: "inv-004", name: "Healing Potion", type: "consumable", equipped: false, quantity: 3, rarity: "common",
+    slots: [],
+    description: "A small vial of shimmering red liquid that glimmers when agitated. It smells faintly of herbs and berries.",
+    image: "https://images.unsplash.com/photo-1587854680352-936b22b91030?w=600&q=80",
+    effects: ["Restores 2d4+2 HP", "Consumed on use"],
+    attributes: { healing: "2d4+2", action: "Bonus action to drink", weight: "0.5 lb" },
+  },
+  {
+    id: "inv-005", name: "Cloak of Elvenkind", type: "wondrous", equipped: true, quantity: 1, rarity: "uncommon",
+    slots: ["Cloak"],
+    description: "A flowing cloak of deep forest green that seems to shift and blend with its surroundings. The fabric is impossibly light and warm.",
+    image: "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=600&q=80",
+    effects: ["Advantage on Stealth checks", "Disadvantage on Perception checks to spot you"],
+    attributes: { weight: "1 lb", attunement: "Yes" },
+  },
+  {
+    id: "inv-006", name: "Rations", type: "consumable", equipped: false, quantity: 8, rarity: "common",
+    slots: [],
+    description: "Dried meat, hardtack biscuits, and a handful of nuts wrapped in oiled cloth. Enough sustenance for one day.",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+    effects: ["Sustains one person for one day"],
+    attributes: { weight: "2 lb each", duration: "1 day" },
+  },
+  {
+    id: "inv-007", name: "Rope (50 ft)", type: "gear", equipped: false, quantity: 1, rarity: "common",
+    slots: [],
+    description: "Fifty feet of sturdy hempen rope, coiled and tied. Useful for climbing, binding, and countless other purposes.",
+    image: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=600&q=80",
+    effects: ["Can be used to restrain, climb, or secure objects", "HP: 2, AC: 10, Break DC: 17"],
+    attributes: { length: "50 ft", weight: "10 lb", "break DC": "17" },
+  },
+  {
+    id: "inv-008", name: "Amulet of the Veil", type: "wondrous", equipped: true, quantity: 1, rarity: "rare",
+    slots: ["Amulet"],
+    description: "A dark obsidian amulet on a silver chain. A faint violet glow pulses within its depths, like a heartbeat. When activated, reality seems to bend around the wearer.",
+    image: "https://images.unsplash.com/photo-1515562141589-67f0d934d1b0?w=600&q=80",
+    effects: ["Once per day, become invisible for 1 minute", "Invisibility breaks on attack or spell cast"],
+    attributes: { charges: "1/day", duration: "1 minute", attunement: "Yes" },
+  },
 ];
 
 export const gear = [
@@ -142,8 +213,8 @@ export const resources = {
 };
 
 export const clocks = [
-  { name: "Syndicate Retaliation", segments: 6, filled: 2, visible: true },
-  { name: "Festival of Masks", segments: 4, filled: 3, visible: true },
+  { name: "Syndicate Retaliation", segments: 6, filled: 2, visible: true, type: "threat" as const, description: "The Syndicate grows more hostile. When full, they strike." },
+  { name: "Festival of Masks", segments: 4, filled: 3, visible: true, type: "event" as const, description: "The annual Festival of Masks approaches. New opportunities await." },
 ];
 
 export const narrativeHistory = [

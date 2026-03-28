@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Sword,
   Shield,
@@ -11,6 +12,7 @@ import {
   Swords,
 } from "lucide-react";
 import { gear } from "@/data/placeholder";
+import EquipmentSlotModal from "./EquipmentSlotModal";
 
 const slotIcons: Record<string, React.ReactNode> = {
   Sword: <Sword size={16} />,
@@ -22,7 +24,11 @@ const slotIcons: Record<string, React.ReactNode> = {
   Footprints: <Footprints size={16} />,
 };
 
+type GearSlot = (typeof gear)[number];
+
 export default function GearPanel() {
+  const [selectedSlot, setSelectedSlot] = useState<GearSlot | null>(null);
+
   return (
     <div className="flex flex-col h-full">
       <div className="panel-header">
@@ -43,6 +49,7 @@ export default function GearPanel() {
                     : "var(--color-bg-elevated)",
                   border: `1px solid ${isEmpty ? "var(--color-border-subtle)" : "var(--color-border)"}`,
                 }}
+                onClick={() => setSelectedSlot(g)}
               >
                 <div
                   style={{
@@ -71,6 +78,22 @@ export default function GearPanel() {
           })}
         </div>
       </div>
+
+      {selectedSlot && (
+        <EquipmentSlotModal
+          slotName={selectedSlot.slot}
+          equippedItemName={selectedSlot.item !== "—" ? selectedSlot.item : null}
+          onEquip={(itemId) => {
+            // Phase 2: will update game state. For now just close.
+            console.log(`Equip ${itemId} to ${selectedSlot.slot}`);
+          }}
+          onUnequip={() => {
+            // Phase 2: will update game state. For now just close.
+            console.log(`Unequip ${selectedSlot.slot}`);
+          }}
+          onClose={() => setSelectedSlot(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig: NextConfig = {
   output: "export",
-  // Use relative asset paths so file:// protocol works in Electron
-  assetPrefix: "./",
+  // Relative paths for Electron file:// protocol, but not in dev
+  ...(isDev ? {} : { assetPrefix: "./" }),
   images: {
     unoptimized: true,
   },

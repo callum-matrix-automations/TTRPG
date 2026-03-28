@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Clock,
   CalendarDays,
@@ -8,17 +9,99 @@ import {
   Coins,
   CircleDot,
   Timer,
+  Siren,
+  CalendarCheck,
 } from "lucide-react";
 import { worldState, resources, clocks } from "@/data/placeholder";
+
+const clockTypeConfig = {
+  threat: { icon: Siren, color: "var(--color-danger)", label: "Threat" },
+  event: { icon: CalendarCheck, color: "var(--color-mana)", label: "Event" },
+};
+
+function ClockTooltip({
+  clock,
+}: {
+  clock: (typeof clocks)[number];
+}) {
+  const config = clockTypeConfig[clock.type];
+
+  return (
+    <div
+      className="absolute top-full left-1/2 -translate-x-1/2 z-50 pt-1"
+      style={{ width: "220px" }}
+    >
+      <div
+        className="rounded-lg p-3"
+        style={{
+          background: "var(--color-bg-surface)",
+          border: "1px solid var(--color-border-strong)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 12px var(--color-gold-glow)",
+        }}
+      >
+        {/* Type badge */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <config.icon size={12} style={{ color: config.color }} />
+          <span
+            className="text-[0.6rem] font-semibold uppercase tracking-wider"
+            style={{ color: config.color }}
+          >
+            {config.label} Clock
+          </span>
+        </div>
+
+        {/* Name */}
+        <p
+          className="text-xs font-semibold mb-1"
+          style={{ fontFamily: "var(--font-heading)", color: "var(--color-pink-light)" }}
+        >
+          {clock.name}
+        </p>
+
+        {/* Progress */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex gap-0.5">
+            {Array.from({ length: clock.segments }).map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-sm border"
+                style={{
+                  borderColor: "var(--color-border-strong)",
+                  background: i < clock.filled ? config.color : "var(--color-bg-deep)",
+                  boxShadow: i < clock.filled ? `0 0 4px ${config.color}66` : "none",
+                }}
+              />
+            ))}
+          </div>
+          <span className="stat-value text-[0.65rem]">
+            {clock.filled}/{clock.segments}
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-[0.65rem] leading-relaxed text-[var(--color-text-secondary)]">
+          {clock.description}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function ClockDisplay({
   clock,
 }: {
-  clock: { name: string; segments: number; filled: number };
+  clock: (typeof clocks)[number];
 }) {
+  const [hovered, setHovered] = useState(false);
+  const config = clockTypeConfig[clock.type];
+
   return (
-    <div className="flex items-center gap-2">
-      <Timer size={13} className="text-[var(--color-purple-light)]" />
+    <div
+      className="relative flex items-center gap-2 cursor-default"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <config.icon size={13} style={{ color: config.color }} />
       <span className="text-xs text-[var(--color-text-secondary)]">
         {clock.name}
       </span>
@@ -31,16 +114,17 @@ function ClockDisplay({
               borderColor: "var(--color-border-strong)",
               background:
                 i < clock.filled
-                  ? "var(--color-gold)"
+                  ? config.color
                   : "var(--color-bg-deep)",
               boxShadow:
                 i < clock.filled
-                  ? "0 0 4px var(--color-gold-glow)"
+                  ? `0 0 4px ${config.color}66`
                   : "none",
             }}
           />
         ))}
       </div>
+      {hovered && <ClockTooltip clock={clock} />}
     </div>
   );
 }

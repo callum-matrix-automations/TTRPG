@@ -138,41 +138,31 @@ function NarrativeEntry({
 export default function NarrativePanel() {
   return (
     <div className="flex flex-col h-full">
-      {/* Scene Image Placeholder */}
+      {/* Scene Image */}
       <div
-        className="w-full shrink-0"
+        className="w-full shrink-0 relative overflow-hidden"
         style={{
           height: "180px",
-          background:
-            "linear-gradient(180deg, var(--color-bg-surface) 0%, var(--color-bg-base) 100%)",
           borderBottom: "1px solid var(--color-border)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          overflow: "hidden",
         }}
       >
-        {/* Atmospheric gradient overlay */}
+        <img
+          src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&q=80"
+          alt="The Gilded Rat Tavern — a dimly lit tavern interior"
+          className="w-full h-full object-cover"
+        />
+        {/* Dark gradient overlay for readability */}
         <div
+          className="absolute inset-0"
           style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse at center, var(--color-purple-glow) 0%, transparent 70%)",
-            opacity: 0.3,
+            background: "linear-gradient(180deg, rgba(13,8,20,0.3) 0%, rgba(13,8,20,0.7) 100%)",
           }}
         />
-        <div className="text-center relative z-10">
-          <BookOpen
-            size={32}
-            className="mx-auto mb-2"
-            style={{ color: "var(--color-text-muted)" }}
-          />
-          <span className="text-xs text-[var(--color-text-muted)]">
-            Scene Image
-          </span>
-          <p className="text-[0.6rem] text-[var(--color-text-muted)] mt-1">
+        <div className="absolute bottom-2 left-3 z-10">
+          <p
+            className="text-xs font-semibold"
+            style={{ fontFamily: "var(--font-heading)", color: "var(--color-pink-light)", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+          >
             The Gilded Rat Tavern
           </p>
         </div>

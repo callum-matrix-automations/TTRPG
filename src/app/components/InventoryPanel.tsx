@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Backpack, Sword, ShieldCheck, Sparkles, FlaskConical, Wrench, Box } from "lucide-react";
 import { inventory } from "@/data/placeholder";
+import ItemModal from "./ItemModal";
 
 const rarityColors: Record<string, string> = {
   common: "var(--color-text-secondary)",
@@ -20,7 +22,11 @@ const typeIcons: Record<string, React.ReactNode> = {
   gear: <Box size={12} />,
 };
 
+type Item = (typeof inventory)[number];
+
 export default function InventoryPanel() {
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
   return (
     <div className="flex flex-col h-full">
       <div className="panel-header">
@@ -41,6 +47,7 @@ export default function InventoryPanel() {
           <div
             key={item.id}
             className="card flex items-start gap-2 cursor-pointer"
+            onClick={() => setSelectedItem(item)}
           >
             <div
               className="mt-0.5 flex-shrink-0"
@@ -80,6 +87,10 @@ export default function InventoryPanel() {
           </div>
         ))}
       </div>
+
+      {selectedItem && (
+        <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      )}
     </div>
   );
 }
