@@ -1,0 +1,282 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600&family=Fira+Code:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════
+   TTRPG THEME — Dark Purple/Gold Elegance
+   Inspired by: Baldur's Gate 3, Dark Fantasy RPG
+   ═══════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Core Palette ── */
+  --color-bg-deepest: #0d0814;
+  --color-bg-deep: #140e1f;
+  --color-bg-base: #1c1228;
+  --color-bg-elevated: #241838;
+  --color-bg-surface: #2d1e3e;
+  --color-bg-hover: #382850;
+
+  /* ── Gold Accents ── */
+  --color-gold: #daa520;
+  --color-gold-light: #eeb428;
+  --color-gold-dim: #b8860b;
+  --color-gold-glow: rgba(218, 165, 32, 0.3);
+  --color-gold-subtle: rgba(218, 165, 32, 0.12);
+
+  /* ── Purple Accents ── */
+  --color-purple-light: #b48cff;
+  --color-purple: #9366d9;
+  --color-purple-dim: #6b4d99;
+  --color-purple-glow: rgba(180, 140, 255, 0.3);
+
+  /* ── Pink Accents ── */
+  --color-pink-light: #ffc8ff;
+  --color-pink: #ffb4dc;
+  --color-pink-dim: #c88ea8;
+
+  /* ── Text ── */
+  --color-text-primary: #f5dcf5;
+  --color-text-secondary: #c8a0c8;
+  --color-text-muted: #8a6a8a;
+  --color-text-gold: #ffe696;
+
+  /* ── Semantic ── */
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-mana: #60a5fa;
+  --color-xp: #a78bfa;
+
+  /* ── Borders ── */
+  --color-border: rgba(218, 165, 32, 0.25);
+  --color-border-strong: rgba(218, 165, 32, 0.6);
+  --color-border-subtle: rgba(218, 165, 32, 0.1);
+
+  /* ── Spacing ── */
+  --spacing-panel: 12px;
+
+  /* ── Fonts ── */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Montserrat', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* ═══════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════ */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  background: var(--color-bg-deepest);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+/* ── Headings ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-pink-light);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--color-gold), var(--color-gold-dim));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, var(--color-gold-light), var(--color-gold));
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════ */
+
+.panel-bg {
+  background: linear-gradient(135deg, var(--color-bg-base) 0%, var(--color-bg-deep) 100%);
+  border: 1px solid var(--color-border);
+}
+
+.panel-header {
+  font-family: var(--font-heading);
+  color: var(--color-pink-light);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-content {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  color: var(--color-text-gold);
+  font-weight: 600;
+}
+
+.gold-glow {
+  text-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 15px var(--color-gold-glow), 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.card {
+  background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 0 20px var(--color-gold-glow);
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.progress-bar-bg {
+  height: 6px;
+  background: var(--color-bg-deep);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ── Resize Handle ── */
+.resize-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.resize-handle:hover {
+  background: var(--color-gold-subtle);
+}
+
+.resize-handle-bar {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--color-border);
+  transition: background 0.15s ease;
+}
+
+.resize-handle:hover .resize-handle-bar {
+  background: var(--color-gold);
+}
+
+/* ── Collapsed Sidebar Icon Strip ── */
+.sidebar-icon-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  background: linear-gradient(180deg, var(--color-bg-base) 0%, var(--color-bg-deep) 100%);
+  border-right: 1px solid var(--color-border);
+  width: 40px;
+  min-width: 40px;
+}
+
+.sidebar-icon-strip button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-icon-strip button:hover {
+  background: var(--color-gold-subtle);
+  color: var(--color-gold);
+}
+
+.sidebar-icon-strip button.active {
+  background: var(--color-gold-subtle);
+  color: var(--color-gold);
+  box-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+/* ── Narrative Streaming Cursor ── */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: '▋';
+  color: var(--color-gold);
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+/* ── Dice Roll Animation ── */
+@keyframes dice-roll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.dice-rolling {
+  animation: dice-roll 0.6s ease-in-out;
+}
+
+/* ── Relationship web placeholder ── */
+.relationship-node {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-pink-light);
+  background: var(--color-bg-elevated);
+  box-shadow: 0 0 12px var(--color-gold-glow);
+}
