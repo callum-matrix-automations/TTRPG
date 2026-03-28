@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Backpack, Sword, ShieldCheck, Sparkles, FlaskConical, Wrench, Box } from "lucide-react";
 import { inventory } from "@/data/placeholder";
-import ItemModal from "./ItemModal";
+import ItemModal from "@/components/modals/ItemModal";
 
 const rarityColors: Record<string, string> = {
   common: "var(--color-text-secondary)",

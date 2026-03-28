@@ -1,4 +1,4 @@
-import GameLayout from "./components/GameLayout";
+import GameLayout from "@/components/layout/GameLayout";
 
 export default function Home() {
   return <GameLayout />;

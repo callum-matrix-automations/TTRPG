@@ -17,14 +17,14 @@ import {
 } from "lucide-react";
 
 import TopBar from "./TopBar";
-import CharacterSheet from "./CharacterSheet";
-import InventoryPanel from "./InventoryPanel";
-import GearPanel from "./GearPanel";
-import RelationshipWeb from "./RelationshipWeb";
-import NarrativePanel from "./NarrativePanel";
-import NpcPanel from "./NpcPanel";
-import QuestLog from "./QuestLog";
-import FactionReputation from "./FactionReputation";
+import CharacterSheet from "@/components/panels/CharacterSheet";
+import InventoryPanel from "@/components/panels/InventoryPanel";
+import GearPanel from "@/components/panels/GearPanel";
+import RelationshipWeb from "@/components/panels/RelationshipWeb";
+import NarrativePanel from "@/components/panels/NarrativePanel";
+import NpcPanel from "@/components/panels/NpcPanel";
+import QuestLog from "@/components/panels/QuestLog";
+import FactionReputation from "@/components/panels/FactionReputation";
 
 type LeftTab = "character" | "inventory" | "gear" | "relationships";
 type RightTab = "npc" | "quests" | "factions";

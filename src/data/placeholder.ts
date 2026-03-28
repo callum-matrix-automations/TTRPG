@@ -200,8 +200,8 @@ export const factions = [
 ];
 
 export const worldState = {
-  time: "22:47",
-  date: "Day 14, Autumn",
+  time: "Late Evening",
+  date: "14th of October, 1247",
   location: "The Gilded Rat Tavern — Trade District",
   weather: "Overcast, light fog",
 };
@@ -252,10 +252,120 @@ export const diceResult = {
   natural: false,
 };
 
-export const relationships = [
-  { id: "player", name: "You", x: 50, y: 50 },
-  { id: "npc-001", name: "Marcus", x: 25, y: 30, relationToPlayer: "cautious trust" },
-  { id: "npc-002", name: "The Crow", x: 75, y: 25, relationToPlayer: "unknown" },
-  { id: "npc-003", name: "Lira Vex", x: 30, y: 75, relationToPlayer: "friendly" },
-  { id: "npc-004", name: "Captain Holt", x: 70, y: 70, relationToPlayer: "neutral" },
+// ── Relationship Graph ──
+
+export type RelationshipNode = {
+  id: string;
+  name: string;
+  faction: string;
+  factionColor: string;
+  disposition: number; // -100 to 100 (toward player)
+  status: "alive" | "dead" | "missing" | "unknown";
+  portrait: string | null;
+  known: boolean; // has the player met them?
+  description: string;
+};
+
+export type RelationshipLink = {
+  source: string;
+  target: string;
+  type: string;
+  strength: number; // 0-1, affects spring distance
+  known: boolean; // does the player know about this link?
+};
+
+export const relationshipNodes: RelationshipNode[] = [
+  {
+    id: "player",
+    name: "Aelindra Voss",
+    faction: "Unaffiliated",
+    factionColor: "#ffb4dc",
+    disposition: 0,
+    status: "alive",
+    portrait: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80",
+    known: true,
+    description: "You. A Level 5 Half-Elf Rogue with a talent for trouble.",
+  },
+  {
+    id: "npc-001",
+    name: "Marcus Vale",
+    faction: "Merchants Guild",
+    factionColor: "#daa520",
+    disposition: 65,
+    status: "alive",
+    portrait: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
+    known: true,
+    description: "A cautious information broker who works the warehouse district. Owes a debt to the Syndicate.",
+  },
+  {
+    id: "npc-002",
+    name: "The Crow",
+    faction: "The Syndicate",
+    factionColor: "#ef4444",
+    disposition: 0,
+    status: "alive",
+    portrait: null,
+    known: false,
+    description: "A mysterious fence operating out of the underground market. No one knows their real face.",
+  },
+  {
+    id: "npc-003",
+    name: "Lira Vex",
+    faction: "The Veil Walkers",
+    factionColor: "#a78bfa",
+    disposition: 72,
+    status: "alive",
+    portrait: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    known: true,
+    description: "An arcane researcher with ties to the Veil Walkers. Helped you identify the rune on your hand.",
+  },
+  {
+    id: "npc-004",
+    name: "Captain Holt",
+    faction: "City Watch",
+    factionColor: "#60a5fa",
+    disposition: 20,
+    status: "alive",
+    portrait: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+    known: true,
+    description: "Watch captain for the Trade District. By-the-book, but not unreasonable.",
+  },
+  {
+    id: "npc-005",
+    name: "Veyra Sindal",
+    faction: "Temple of Dawn",
+    factionColor: "#22c55e",
+    disposition: 40,
+    status: "alive",
+    portrait: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    known: true,
+    description: "A healer at the Temple of Dawn. Treated your injuries after the dock ambush. Knows more than she lets on.",
+  },
+  {
+    id: "npc-006",
+    name: "???",
+    faction: "The Syndicate",
+    factionColor: "#ef4444",
+    disposition: 0,
+    status: "unknown",
+    portrait: null,
+    known: false,
+    description: "Someone Marcus mentioned — a Syndicate enforcer. You've never met them.",
+  },
+];
+
+export const relationshipLinks: RelationshipLink[] = [
+  // Player connections
+  { source: "player", target: "npc-001", type: "Cautious Trust", strength: 0.65, known: true },
+  { source: "player", target: "npc-003", type: "Friendly", strength: 0.72, known: true },
+  { source: "player", target: "npc-004", type: "Neutral", strength: 0.2, known: true },
+  { source: "player", target: "npc-005", type: "Warm", strength: 0.4, known: true },
+
+  // NPC-to-NPC connections
+  { source: "npc-001", target: "npc-002", type: "Rival", strength: 0.8, known: true },
+  { source: "npc-001", target: "npc-006", type: "Debtor", strength: 0.9, known: true },
+  { source: "npc-002", target: "npc-006", type: "Associates", strength: 0.7, known: false },
+  { source: "npc-003", target: "npc-005", type: "Old Friends", strength: 0.5, known: true },
+  { source: "npc-004", target: "npc-001", type: "Suspicious Of", strength: 0.3, known: true },
+  { source: "npc-004", target: "npc-006", type: "Investigating", strength: 0.6, known: false },
 ];
