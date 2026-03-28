@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Flag } from "lucide-react";
-import { factions } from "@/data/placeholder";
+import { factions, type Faction } from "@/data/placeholder";
+import FactionModal from "@/components/modals/FactionModal";
 
 export default function FactionReputation() {
+  const [selectedFaction, setSelectedFaction] = useState<Faction | null>(null);
+
   return (
     <div className="flex flex-col h-full">
       <div className="panel-header">
@@ -12,15 +16,15 @@ export default function FactionReputation() {
       </div>
       <div className="panel-content space-y-2">
         {factions.map((f) => {
-          // Scale: -100 to 100 → 0% to 100%
           const percent = ((f.reputation + 100) / 200) * 100;
           return (
-            <div key={f.name} className="card">
+            <div
+              key={f.name}
+              className="card cursor-pointer"
+              onClick={() => setSelectedFaction(f)}
+            >
               <div className="flex items-center justify-between mb-1">
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: f.color }}
-                >
+                <span className="text-xs font-medium" style={{ color: f.color }}>
                   {f.name}
                 </span>
                 <span className="stat-value text-[0.65rem]">
@@ -37,16 +41,17 @@ export default function FactionReputation() {
                   }}
                 />
               </div>
-              <span
-                className="text-[0.6rem] mt-0.5 inline-block"
-                style={{ color: f.color }}
-              >
+              <span className="text-[0.6rem] mt-0.5 inline-block" style={{ color: f.color }}>
                 {f.tier}
               </span>
             </div>
           );
         })}
       </div>
+
+      {selectedFaction && (
+        <FactionModal faction={selectedFaction} onClose={() => setSelectedFaction(null)} />
+      )}
     </div>
   );
 }

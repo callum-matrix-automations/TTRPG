@@ -9,6 +9,7 @@ import {
   Users,
   ScrollText,
   Flag,
+  Shield,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
@@ -18,6 +19,7 @@ import {
 
 import TopBar from "./TopBar";
 import CharacterSheet from "@/components/panels/CharacterSheet";
+import PartyPanel from "@/components/panels/PartyPanel";
 import InventoryPanel from "@/components/panels/InventoryPanel";
 import GearPanel from "@/components/panels/GearPanel";
 import RelationshipWeb from "@/components/panels/RelationshipWeb";
@@ -26,18 +28,19 @@ import NpcPanel from "@/components/panels/NpcPanel";
 import QuestLog from "@/components/panels/QuestLog";
 import FactionReputation from "@/components/panels/FactionReputation";
 
-type LeftTab = "character" | "inventory" | "gear" | "relationships";
+type LeftTab = "character" | "party" | "inventory" | "gear" | "relationships";
 type RightTab = "npc" | "quests" | "factions";
 
 const leftTabs: { id: LeftTab; icon: typeof User; label: string }[] = [
   { id: "character", icon: User, label: "Character" },
+  { id: "party", icon: Shield, label: "Party" },
   { id: "inventory", icon: Backpack, label: "Inventory" },
   { id: "gear", icon: Swords, label: "Equipment" },
   { id: "relationships", icon: Network, label: "Relationships" },
 ];
 
 const rightTabs: { id: RightTab; icon: typeof Users; label: string }[] = [
-  { id: "npc", icon: Users, label: "NPC" },
+  { id: "npc", icon: Users, label: "NPCs" },
   { id: "quests", icon: ScrollText, label: "Quests" },
   { id: "factions", icon: Flag, label: "Factions" },
 ];
@@ -206,6 +209,7 @@ export default function GameLayout() {
   const renderLeftContent = () => {
     switch (leftTab) {
       case "character": return <CharacterSheet />;
+      case "party": return <PartyPanel />;
       case "inventory": return <InventoryPanel />;
       case "gear": return <GearPanel />;
       case "relationships": return <RelationshipWeb />;

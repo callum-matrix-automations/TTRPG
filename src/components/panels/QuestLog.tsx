@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { ScrollText, CheckCircle2, Circle, Trophy, Coins, Star } from "lucide-react";
-import { questLog } from "@/data/placeholder";
+import { questLog, type Quest } from "@/data/placeholder";
+import QuestModal from "@/components/modals/QuestModal";
 
 const statusColors: Record<string, string> = {
   active: "var(--color-gold)",
@@ -10,6 +12,8 @@ const statusColors: Record<string, string> = {
 };
 
 export default function QuestLog() {
+  const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
+
   return (
     <div className="flex flex-col h-full">
       <div className="panel-header">
@@ -34,6 +38,7 @@ export default function QuestLog() {
               borderLeft: `3px solid ${statusColors[quest.status]}`,
               opacity: quest.status === "completed" ? 0.6 : 1,
             }}
+            onClick={() => setSelectedQuest(quest)}
           >
             {/* Title */}
             <div className="flex items-center gap-2 mb-1">
@@ -60,39 +65,24 @@ export default function QuestLog() {
             </div>
 
             {/* Description */}
-            <p className="text-[0.65rem] text-[var(--color-text-secondary)] mb-2 leading-relaxed">
+            <p className="text-[0.65rem] text-[var(--color-text-secondary)] mb-2 leading-relaxed line-clamp-2">
               {quest.description}
             </p>
 
-            {/* Objectives */}
-            <div className="space-y-0.5 mb-2">
-              {quest.objectives.map((obj, i) => (
+            {/* Objectives summary */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="progress-bar-bg flex-1" style={{ height: "3px" }}>
                 <div
-                  key={i}
-                  className="flex items-start gap-1.5 text-[0.65rem]"
-                >
-                  {obj.completed ? (
-                    <CheckCircle2
-                      size={11}
-                      className="mt-0.5 flex-shrink-0 text-[var(--color-success)]"
-                    />
-                  ) : (
-                    <Circle
-                      size={11}
-                      className="mt-0.5 flex-shrink-0 text-[var(--color-text-muted)]"
-                    />
-                  )}
-                  <span
-                    className={
-                      obj.completed
-                        ? "line-through text-[var(--color-text-muted)]"
-                        : "text-[var(--color-text-secondary)]"
-                    }
-                  >
-                    {obj.text}
-                  </span>
-                </div>
-              ))}
+                  className="progress-bar-fill"
+                  style={{
+                    width: `${(quest.objectives.filter((o) => o.completed).length / quest.objectives.length) * 100}%`,
+                    background: statusColors[quest.status],
+                  }}
+                />
+              </div>
+              <span className="stat-value text-[0.55rem]">
+                {quest.objectives.filter((o) => o.completed).length}/{quest.objectives.length}
+              </span>
             </div>
 
             {/* Rewards Preview */}
@@ -116,7 +106,7 @@ export default function QuestLog() {
                 <div className="flex items-center gap-1">
                   <Trophy size={10} className="text-[var(--color-purple-light)]" />
                   <span className="text-[0.6rem] text-[var(--color-purple-light)]">
-                    {quest.rewards.items.join(", ")}
+                    {quest.rewards.items.length} item{quest.rewards.items.length > 1 ? "s" : ""}
                   </span>
                 </div>
               )}
@@ -124,6 +114,10 @@ export default function QuestLog() {
           </div>
         ))}
       </div>
+
+      {selectedQuest && (
+        <QuestModal quest={selectedQuest} onClose={() => setSelectedQuest(null)} />
+      )}
     </div>
   );
 }

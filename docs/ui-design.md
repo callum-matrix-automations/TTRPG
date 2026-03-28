@@ -16,7 +16,8 @@ Full mapping of every UI surface needed across all phases, what currently exists
 | GearPanel | `GearPanel.tsx` | 2-column equipment slot grid, clickable to open slot modal |
 | EquipmentSlotModal | `EquipmentSlotModal.tsx` | Equip/unequip compatible items per slot. Animated open/close. |
 | NarrativePanel | `NarrativePanel.tsx` | Scene image, narrative entries (narration/NPC/player/system), dice result card, action suggestions, text input |
-| NpcPanel | `NpcPanel.tsx` | Single NPC: portrait, name, faction, disposition bar, traits, appearance |
+| PartyPanel | `PartyPanel.tsx` | Left sidebar: companion list with expandable character sheets (HP, stats, skills, abilities, gear, loyalty) |
+| NpcPanel | `NpcPanel.tsx` | Right sidebar: tiered NPC display. Portrait selector for active/passive NPCs, collapsible background section. Active NPCs show observed capabilities and threat impression. |
 | QuestLog | `QuestLog.tsx` | Quest cards with objectives, completion status, reward previews |
 | FactionReputation | `FactionReputation.tsx` | Reputation bars per faction with tier labels |
 | RelationshipWeb | `RelationshipWeb.tsx` | SVG node graph with connection lines (basic placeholder) |
@@ -30,6 +31,40 @@ Full mapping of every UI surface needed across all phases, what currently exists
 - Dice roll result is static — no animation
 - Narrative input/action buttons have no handlers
 - Equip/unequip only logs to console (no state mutation)
+
+---
+
+## NPC Tier System — UI Specifications
+
+NPCs are displayed differently based on their tier. See `architecture.md` for the full tier definition and promotion rules.
+
+### Left Sidebar — Party Tab (Companions)
+
+Companions appear in a dedicated **Party** tab in the left sidebar (between Character and Inventory).
+
+| Element | Description |
+|---|---|
+| Companion card (collapsed) | Portrait circle (faction-colored border), name, class/level, HP bar |
+| Companion card (expanded) | Full mini character sheet: 6-stat grid, skills, abilities, gear summary, status effects, loyalty, join date |
+| Empty state | Shield icon + "No companions yet" message |
+
+### Right Sidebar — NPC Tab (Scene NPCs)
+
+The NPC tab shows all NPCs present in the current scene, organized by tier.
+
+| Tier | Selector | Detail View |
+|---|---|---|
+| **Active** | Portrait in selector with gold tier dot | Full portrait, name/faction/class/level, disposition bar, threat impression card, observed capabilities (badges), visible status (badges), traits, appearance |
+| **Passive** | Portrait in selector with purple tier dot | Portrait, name/faction/level, disposition bar, traits, appearance. No combat stats shown. |
+| **Background** | Not in selector | Collapsible section at bottom: compact cards with small portrait + name + one-line description |
+
+### Tier Promotion Flow (UI Transitions)
+
+| Promotion | UI Change |
+|---|---|
+| Background → Passive | NPC moves from background section to the portrait selector. AI assigns basic stats (level, HP, XP). |
+| Passive → Active | AI generates full stat block. Detail view gains: class, threat impression, observed capabilities, visible status sections. |
+| Active → Companion | NPC moves from right sidebar NPC tab to left sidebar Party tab. Full character sheet becomes available. |
 
 ---
 
