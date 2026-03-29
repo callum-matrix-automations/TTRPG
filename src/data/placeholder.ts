@@ -403,6 +403,7 @@ export type Quest = {
   id: string;
   title: string;
   status: "active" | "completed" | "failed";
+  image: string | null;
   description: string;
   lore: string;
   questGiver: string;
@@ -417,6 +418,7 @@ export const questLog: Quest[] = [
     id: "quest-001",
     title: "The Stolen Artifact",
     status: "active",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80",
     description: "Marcus Vale has asked you to recover a stolen artifact from the underground market in the Old Quarter.",
     lore: "The Orb of Shadows is an ancient relic tied to the Veil Walkers. It was stolen from a private collection three weeks ago and has since surfaced on the black market. Marcus believes a fence known as 'The Crow' is brokering the sale. The Syndicate has eyes on every entrance to the underground market — but Marcus knows a way in through the catacombs.",
     questGiver: "Marcus Vale",
@@ -433,6 +435,7 @@ export const questLog: Quest[] = [
     id: "quest-002",
     title: "Whispers in the Dark",
     status: "active",
+    image: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&q=80",
     description: "Strange whispers have been reported in the warehouse district at night. Investigate the source.",
     lore: "Dock workers have been refusing to work the late shift near Warehouse 14. They claim to hear voices speaking in a language they can't understand, always after midnight. Captain Holt mentioned it in passing — he doesn't believe in ghosts but can't afford to lose more workers.",
     questGiver: "Captain Holt",
@@ -448,6 +451,7 @@ export const questLog: Quest[] = [
     id: "quest-003",
     title: "A Merchant's Debt",
     status: "completed",
+    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80",
     description: "Help Marcus settle his debt with the Syndicate.",
     lore: "Marcus owed the Syndicate 5000 gold from a deal gone wrong. He managed to scrape together 3000 but needed help negotiating the remainder. You brokered a deal — the Syndicate accepted the 3000 plus a future favor. Marcus is relieved but knows the favor will come due eventually.",
     questGiver: "Marcus Vale",
@@ -466,6 +470,7 @@ export type Faction = {
   reputation: number;
   tier: string;
   color: string;
+  image: string | null;
   description: string;
   territory: string;
   leader: string;
@@ -481,6 +486,7 @@ export const factions: Faction[] = [
     reputation: 45,
     tier: "Friendly",
     color: "#daa520",
+    image: "https://images.unsplash.com/photo-1567449303078-57ad995bd329?w=800&q=80",
     description: "The Merchants Guild controls the legal flow of goods through the Trade District and beyond. Wealthy, well-connected, and quietly ruthless when their interests are threatened.",
     territory: "Trade District, Market Square",
     leader: "Guildmaster Aldric Thorne (unseen)",
@@ -494,6 +500,7 @@ export const factions: Faction[] = [
     reputation: -15,
     tier: "Unfriendly",
     color: "#ef4444",
+    image: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?w=800&q=80",
     description: "A criminal network operating from the shadows. They deal in stolen goods, protection rackets, and information. Nobody knows who leads them — only that crossing them is a mistake.",
     territory: "Old Quarter, Warehouse District (underground)",
     leader: "Unknown",
@@ -507,6 +514,7 @@ export const factions: Faction[] = [
     reputation: 20,
     tier: "Neutral",
     color: "#60a5fa",
+    image: "https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?w=800&q=80",
     description: "The official law enforcement of the city. Underfunded and overstretched, but Captain Holt runs a disciplined operation in the Trade District. They tolerate adventurers as long as the peace is kept.",
     territory: "All districts (headquarters in Civic Quarter)",
     leader: "Captain Holt (Trade District)",
@@ -520,6 +528,7 @@ export const factions: Faction[] = [
     reputation: 60,
     tier: "Allied",
     color: "#a78bfa",
+    image: "https://images.unsplash.com/photo-1518562180175-34a163b1a9a6?w=800&q=80",
     description: "A secretive order of arcanists who study the boundary between the material world and the planes beyond. They keep to themselves but have taken an interest in the rune on your hand.",
     territory: "The Veil Walker Sanctum (hidden location)",
     leader: "Archon Sythara",
@@ -533,6 +542,7 @@ export const factions: Faction[] = [
     reputation: 5,
     tier: "Neutral",
     color: "#22c55e",
+    image: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=800&q=80",
     description: "The city's primary religious institution, dedicated to healing and protection. They run free clinics and shelters. Veyra Sindal is an acolyte there — kind on the surface, but the Temple guards its secrets closely.",
     territory: "Temple Quarter",
     leader: "High Priestess Morwen",

@@ -81,7 +81,15 @@ export default function FactionModal({
         </button>
 
         <div className="max-h-[80vh] overflow-y-auto">
-          <div className="px-5 pt-5 pb-5 space-y-4">
+          {/* Faction Cover Image */}
+          {faction.image && (
+            <div className="relative w-full h-40 overflow-hidden">
+              <img src={faction.image} alt={faction.name} className="w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 30%, var(--color-bg-surface) 100%)` }} />
+            </div>
+          )}
+
+          <div className={`px-5 pb-5 space-y-4 ${faction.image ? "-mt-6 relative z-10" : "pt-5"}`}>
 
             {/* Header */}
             <div>

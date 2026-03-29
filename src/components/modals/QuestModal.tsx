@@ -79,7 +79,15 @@ export default function QuestModal({
         </button>
 
         <div className="max-h-[80vh] overflow-y-auto">
-          <div className="px-5 pt-5 pb-5 space-y-4">
+          {/* Quest Cover Image */}
+          {quest.image && (
+            <div className="relative w-full h-40 overflow-hidden">
+              <img src={quest.image} alt={quest.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 30%, var(--color-bg-surface) 100%)" }} />
+            </div>
+          )}
+
+          <div className={`px-5 pb-5 space-y-4 ${quest.image ? "-mt-6 relative z-10" : "pt-5"}`}>
             {/* Header */}
             <div>
               <div className="flex items-center gap-2 mb-1">
