@@ -731,87 +731,232 @@ export type GamePhase = "player_action" | "resolution" | "world_response" | "wor
 
 export const gamePhase: GamePhase = "player_action";
 
-// ── World Map — Hub and Spoke ──
+// ── World Map — Hierarchical Spatial Graph ──
+// See docs/map-implementation.md for full design
+
+export type LocationDepth = "world" | "district" | "zone" | "building" | "room";
+
+export type MapConnection = {
+  targetId: string;
+  travelMinutes: number;
+  energyCost: number;
+  direction: string;
+  accessible: boolean;
+  accessCondition: string | null;
+  discovered: boolean;
+};
 
 export type MapLocation = {
   id: string;
   name: string;
-  type: "hub" | "spoke" | "sub";
+  depth: LocationDepth;
   parentId: string | null;
-  hubId: string;
+  authored: "handcrafted" | "ai-generated";
+  aiCanGenerateChildren: boolean;
+  aiCanGenerateSiblings: boolean;
+  maxAiDepth: number;
+  connections: MapConnection[];
   description: string;
   faction: string | null;
   factionColor: string | null;
-  dangerLevel: 0 | 1 | 2 | 3; // 0=safe, 1=low, 2=moderate, 3=high
+  dangerLevel: 0 | 1 | 2 | 3;
   restricted: { condition: string; when: string } | null;
-  availableHours: string | null; // null = always, "06:00-22:00" = daytime only
+  availableHours: string | null;
   npcsPresent: string[];
   discovered: boolean;
   playerIsHere: boolean;
-  x: number; // map position (percentage)
+  x: number;
   y: number;
 };
 
-export type MapPath = {
-  from: string;
-  to: string;
-  travelMinutes: number;
-  energyCost: number;
-  dangerLevel: 0 | 1 | 2 | 3;
-};
-
 export const mapLocations: MapLocation[] = [
-  // ── Trade District (Hub) ──
-  { id: "hub-trade", name: "Trade District", type: "hub", parentId: null, hubId: "hub-trade", description: "The commercial heart of the city. Markets, guild halls, and taverns line the wide streets.", faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 50, y: 40 },
-  { id: "gilded-rat", name: "The Gilded Rat Tavern", type: "spoke", parentId: "hub-trade", hubId: "hub-trade", description: "A weathered tavern frequented by information brokers and dock workers.", faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: ["npc-001"], discovered: true, playerIsHere: true, x: 42, y: 35 },
-  { id: "market-square", name: "Market Square", type: "spoke", parentId: "hub-trade", hubId: "hub-trade", description: "The bustling open-air market. Merchants hawk wares from dawn to dusk.", faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0, restricted: null, availableHours: "06:00-20:00", npcsPresent: [], discovered: true, playerIsHere: false, x: 58, y: 32 },
-  { id: "guild-hall", name: "Merchants Guild Hall", type: "spoke", parentId: "hub-trade", hubId: "hub-trade", description: "An imposing stone building. The Guild conducts business behind closed doors.", faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0, restricted: { condition: "reputation:merchants_guild:friendly", when: "always" }, availableHours: "08:00-18:00", npcsPresent: [], discovered: true, playerIsHere: false, x: 55, y: 48 },
+  // ══════════════════════════════════════
+  // WORLD LEVEL — The City
+  // ══════════════════════════════════════
 
-  // ── Old Quarter (Hub) ──
-  { id: "hub-old", name: "Old Quarter", type: "hub", parentId: null, hubId: "hub-old", description: "Narrow alleys and crumbling buildings. The city's history is written in its worn stones — along with its secrets.", faction: "The Syndicate", factionColor: "#ef4444", dangerLevel: 2, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 25, y: 30 },
-  { id: "underground-market", name: "Underground Market", type: "spoke", parentId: "hub-old", hubId: "hub-old", description: "A hidden network of tunnels beneath the Old Quarter where anything can be bought — for the right price.", faction: "The Syndicate", factionColor: "#ef4444", dangerLevel: 3, restricted: { condition: "quest:quest-001:active", when: "always" }, availableHours: "20:00-04:00", npcsPresent: ["npc-002"], discovered: true, playerIsHere: false, x: 18, y: 22 },
-  { id: "catacomb-entrance", name: "Catacomb Entrance", type: "sub", parentId: "underground-market", hubId: "hub-old", description: "A hidden passage through the old catacombs. Marcus marked it on your map.", faction: null, factionColor: null, dangerLevel: 3, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 12, y: 18 },
+  // ── Trade District (district) ──
+  {
+    id: "trade-district", name: "Trade District", depth: "district", parentId: null,
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "old-quarter", travelMinutes: 45, energyCost: 5, direction: "west through the narrows", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "temple-quarter", travelMinutes: 30, energyCost: 3, direction: "east along the promenade", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "warehouse-district", travelMinutes: 30, energyCost: 3, direction: "south toward the docks", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "residential-district", travelMinutes: 20, energyCost: 2, direction: "north uphill", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "The commercial heart of the city. Markets, guild halls, and taverns line the wide streets.",
+    faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: true, x: 50, y: 45,
+  },
+  // ── Old Quarter (district) ──
+  {
+    id: "old-quarter", name: "Old Quarter", depth: "district", parentId: null,
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "trade-district", travelMinutes: 45, energyCost: 5, direction: "east to the markets", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "warehouse-district", travelMinutes: 25, energyCost: 3, direction: "south along the canal", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "Narrow alleys and crumbling buildings. The city's history is written in its worn stones — along with its secrets.",
+    faction: "The Syndicate", factionColor: "#ef4444", dangerLevel: 2, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 20, y: 30,
+  },
+  // ── Temple Quarter (district) ──
+  {
+    id: "temple-quarter", name: "Temple Quarter", depth: "district", parentId: null,
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "trade-district", travelMinutes: 30, energyCost: 3, direction: "west to the markets", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "residential-district", travelMinutes: 20, energyCost: 2, direction: "north through quiet streets", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "Peaceful streets surrounding the Temple of Dawn. Healers, priests, and the faithful gather here.",
+    faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 75, y: 55,
+  },
+  // ── Warehouse District (district) ──
+  {
+    id: "warehouse-district", name: "Warehouse District", depth: "district", parentId: null,
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "trade-district", travelMinutes: 30, energyCost: 3, direction: "north to the markets", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "old-quarter", travelMinutes: 25, energyCost: 3, direction: "northwest along the canal", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "residential-district", travelMinutes: 35, energyCost: 4, direction: "northeast uphill", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "Rows of storage buildings near the docks. Quiet by day, dangerous by night.",
+    faction: "City Watch", factionColor: "#60a5fa", dangerLevel: 1, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 35, y: 75,
+  },
+  // ── Residential District (district) ──
+  {
+    id: "residential-district", name: "Residential District", depth: "district", parentId: null,
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "trade-district", travelMinutes: 20, energyCost: 2, direction: "south downhill", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "temple-quarter", travelMinutes: 20, energyCost: 2, direction: "south through quiet streets", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "warehouse-district", travelMinutes: 35, energyCost: 4, direction: "southwest downhill", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "Where the city's people live. Modest homes, a few boarding houses, and the occasional hidden gem.",
+    faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 70, y: 20,
+  },
 
-  // ── Temple Quarter (Hub) ──
-  { id: "hub-temple", name: "Temple Quarter", type: "hub", parentId: null, hubId: "hub-temple", description: "Peaceful streets surrounding the Temple of Dawn. Healers, priests, and the faithful gather here.", faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 70, y: 55 },
-  { id: "temple-dawn", name: "Temple of Dawn", type: "spoke", parentId: "hub-temple", hubId: "hub-temple", description: "The city's grand temple. Offers healing, shelter, and counsel to those in need.", faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: "06:00-22:00", npcsPresent: ["npc-005"], discovered: true, playerIsHere: false, x: 78, y: 52 },
-  { id: "healer-clinic", name: "Healer's Clinic", type: "spoke", parentId: "hub-temple", hubId: "hub-temple", description: "A small clinic run by Temple acolytes. Affordable healing for the common folk.", faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: "08:00-20:00", npcsPresent: [], discovered: true, playerIsHere: false, x: 75, y: 62 },
+  // ══════════════════════════════════════
+  // ZONE LEVEL — Inside Trade District
+  // ══════════════════════════════════════
 
-  // ── Warehouse District (Hub) ──
-  { id: "hub-warehouse", name: "Warehouse District", type: "hub", parentId: null, hubId: "hub-warehouse", description: "Rows of storage buildings near the docks. Quiet by day, dangerous by night.", faction: "City Watch", factionColor: "#60a5fa", dangerLevel: 1, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 30, y: 65 },
-  { id: "warehouse-14", name: "Warehouse 14", type: "spoke", parentId: "hub-warehouse", hubId: "hub-warehouse", description: "The source of the strange whispers. Workers refuse to enter after dark.", faction: null, factionColor: null, dangerLevel: 2, restricted: { condition: "time:after:22:00", when: "night" }, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 22, y: 72 },
-  { id: "watch-post", name: "Watch Post", type: "spoke", parentId: "hub-warehouse", hubId: "hub-warehouse", description: "A small City Watch outpost keeping an eye on the warehouse district.", faction: "City Watch", factionColor: "#60a5fa", dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: ["npc-004"], discovered: true, playerIsHere: false, x: 38, y: 70 },
+  {
+    id: "gilded-rat", name: "The Gilded Rat Tavern", depth: "zone", parentId: "trade-district",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 2,
+    connections: [
+      { targetId: "market-square", travelMinutes: 10, energyCost: 0, direction: "east to the market", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "guild-hall", travelMinutes: 10, energyCost: 0, direction: "south to the guild hall", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "A weathered tavern frequented by information brokers and dock workers. The ale is passable, the company is questionable.",
+    faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: ["npc-001"], discovered: true, playerIsHere: true, x: 35, y: 30,
+  },
+  {
+    id: "market-square", name: "Market Square", depth: "zone", parentId: "trade-district",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: true, maxAiDepth: 2,
+    connections: [
+      { targetId: "gilded-rat", travelMinutes: 10, energyCost: 0, direction: "west to the tavern", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "guild-hall", travelMinutes: 5, energyCost: 0, direction: "south past the fountain", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "The bustling open-air market. Merchants hawk wares from dawn to dusk.",
+    faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0, restricted: null, availableHours: "06:00-20:00",
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 65, y: 25,
+  },
+  {
+    id: "guild-hall", name: "Merchants Guild Hall", depth: "zone", parentId: "trade-district",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 2,
+    connections: [
+      { targetId: "gilded-rat", travelMinutes: 10, energyCost: 0, direction: "north to the tavern", accessible: true, accessCondition: null, discovered: true },
+      { targetId: "market-square", travelMinutes: 5, energyCost: 0, direction: "north past the fountain", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "An imposing stone building. The Guild conducts business behind closed doors.",
+    faction: "Merchants Guild", factionColor: "#daa520", dangerLevel: 0,
+    restricted: { condition: "reputation:merchants_guild:friendly", when: "always" }, availableHours: "08:00-18:00",
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 50, y: 70,
+  },
 
-  // ── Residential District (Hub) — partially discovered ──
-  { id: "hub-residential", name: "Residential District", type: "hub", parentId: null, hubId: "hub-residential", description: "Where the city's people live. Modest homes, a few boarding houses, and the occasional hidden gem.", faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 65, y: 25 },
-  { id: "boarding-house", name: "Mara's Boarding House", type: "spoke", parentId: "hub-residential", hubId: "hub-residential", description: "A cheap but clean place to rent a room. Mara doesn't ask questions.", faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: [], discovered: true, playerIsHere: false, x: 72, y: 20 },
-  { id: "undiscovered-1", name: "???", type: "spoke", parentId: "hub-residential", hubId: "hub-residential", description: "An area you haven't explored yet.", faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null, npcsPresent: [], discovered: false, playerIsHere: false, x: 60, y: 18 },
-];
+  // ══════════════════════════════════════
+  // ZONE LEVEL — Inside Old Quarter
+  // ══════════════════════════════════════
 
-export const mapPaths: MapPath[] = [
-  // Within Trade District
-  { from: "hub-trade", to: "gilded-rat", travelMinutes: 5, energyCost: 0, dangerLevel: 0 },
-  { from: "hub-trade", to: "market-square", travelMinutes: 10, energyCost: 0, dangerLevel: 0 },
-  { from: "hub-trade", to: "guild-hall", travelMinutes: 10, energyCost: 0, dangerLevel: 0 },
-  // Within Old Quarter
-  { from: "hub-old", to: "underground-market", travelMinutes: 15, energyCost: 0, dangerLevel: 2 },
-  { from: "underground-market", to: "catacomb-entrance", travelMinutes: 10, energyCost: 0, dangerLevel: 3 },
-  // Within Temple Quarter
-  { from: "hub-temple", to: "temple-dawn", travelMinutes: 5, energyCost: 0, dangerLevel: 0 },
-  { from: "hub-temple", to: "healer-clinic", travelMinutes: 10, energyCost: 0, dangerLevel: 0 },
-  // Within Warehouse District
-  { from: "hub-warehouse", to: "warehouse-14", travelMinutes: 10, energyCost: 0, dangerLevel: 1 },
-  { from: "hub-warehouse", to: "watch-post", travelMinutes: 5, energyCost: 0, dangerLevel: 0 },
-  // Within Residential
-  { from: "hub-residential", to: "boarding-house", travelMinutes: 5, energyCost: 0, dangerLevel: 0 },
-  // Hub-to-hub travel
-  { from: "hub-trade", to: "hub-old", travelMinutes: 45, energyCost: 5, dangerLevel: 1 },
-  { from: "hub-trade", to: "hub-temple", travelMinutes: 30, energyCost: 3, dangerLevel: 0 },
-  { from: "hub-trade", to: "hub-warehouse", travelMinutes: 30, energyCost: 3, dangerLevel: 0 },
-  { from: "hub-trade", to: "hub-residential", travelMinutes: 20, energyCost: 2, dangerLevel: 0 },
-  { from: "hub-old", to: "hub-warehouse", travelMinutes: 25, energyCost: 3, dangerLevel: 1 },
-  { from: "hub-temple", to: "hub-residential", travelMinutes: 20, energyCost: 2, dangerLevel: 0 },
-  { from: "hub-warehouse", to: "hub-residential", travelMinutes: 35, energyCost: 4, dangerLevel: 0 },
+  {
+    id: "underground-market", name: "Underground Market", depth: "zone", parentId: "old-quarter",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: true, maxAiDepth: 3,
+    connections: [
+      { targetId: "catacomb-entrance", travelMinutes: 10, energyCost: 0, direction: "through the tunnels", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "A hidden network of tunnels beneath the Old Quarter where anything can be bought — for the right price.",
+    faction: "The Syndicate", factionColor: "#ef4444", dangerLevel: 3,
+    restricted: { condition: "quest:quest-001:active", when: "always" }, availableHours: "20:00-04:00",
+    npcsPresent: ["npc-002"], discovered: true, playerIsHere: false, x: 40, y: 35,
+  },
+  {
+    id: "catacomb-entrance", name: "Catacomb Entrance", depth: "zone", parentId: "old-quarter",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 2,
+    connections: [
+      { targetId: "underground-market", travelMinutes: 10, energyCost: 0, direction: "back through the tunnels", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "A hidden passage through the old catacombs. Marcus marked it on your map.",
+    faction: null, factionColor: null, dangerLevel: 3, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 60, y: 65,
+  },
+
+  // ══════════════════════════════════════
+  // ZONE LEVEL — Inside Other Districts
+  // ══════════════════════════════════════
+
+  {
+    id: "temple-dawn", name: "Temple of Dawn", depth: "zone", parentId: "temple-quarter",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 2,
+    connections: [
+      { targetId: "healer-clinic", travelMinutes: 5, energyCost: 0, direction: "around the courtyard", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "The city's grand temple. Offers healing, shelter, and counsel to those in need.",
+    faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: "06:00-22:00",
+    npcsPresent: ["npc-005"], discovered: true, playerIsHere: false, x: 55, y: 40,
+  },
+  {
+    id: "healer-clinic", name: "Healer's Clinic", depth: "zone", parentId: "temple-quarter",
+    authored: "handcrafted", aiCanGenerateChildren: false, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "temple-dawn", travelMinutes: 5, energyCost: 0, direction: "around the courtyard", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "A small clinic run by Temple acolytes. Affordable healing for the common folk.",
+    faction: "Temple of Dawn", factionColor: "#22c55e", dangerLevel: 0, restricted: null, availableHours: "08:00-20:00",
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 45, y: 65,
+  },
+  {
+    id: "warehouse-14", name: "Warehouse 14", depth: "zone", parentId: "warehouse-district",
+    authored: "handcrafted", aiCanGenerateChildren: true, aiCanGenerateSiblings: false, maxAiDepth: 2,
+    connections: [
+      { targetId: "watch-post", travelMinutes: 10, energyCost: 0, direction: "east along the docks", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "The source of the strange whispers. Workers refuse to enter after dark.",
+    faction: null, factionColor: null, dangerLevel: 2,
+    restricted: { condition: "time:after:22:00", when: "night" }, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 35, y: 40,
+  },
+  {
+    id: "watch-post", name: "Watch Post", depth: "zone", parentId: "warehouse-district",
+    authored: "handcrafted", aiCanGenerateChildren: false, aiCanGenerateSiblings: false, maxAiDepth: 0,
+    connections: [
+      { targetId: "warehouse-14", travelMinutes: 10, energyCost: 0, direction: "west along the docks", accessible: true, accessCondition: null, discovered: true },
+    ],
+    description: "A small City Watch outpost keeping an eye on the warehouse district.",
+    faction: "City Watch", factionColor: "#60a5fa", dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: ["npc-004"], discovered: true, playerIsHere: false, x: 65, y: 55,
+  },
+  {
+    id: "boarding-house", name: "Mara's Boarding House", depth: "zone", parentId: "residential-district",
+    authored: "handcrafted", aiCanGenerateChildren: false, aiCanGenerateSiblings: true, maxAiDepth: 0,
+    connections: [],
+    description: "A cheap but clean place to rent a room. Mara doesn't ask questions.",
+    faction: null, factionColor: null, dangerLevel: 0, restricted: null, availableHours: null,
+    npcsPresent: [], discovered: true, playerIsHere: false, x: 50, y: 45,
+  },
 ];
 
 // ── Property ──

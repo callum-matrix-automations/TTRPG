@@ -1,0 +1,76 @@
+Ok, I'm going to address all of those items.
+
+Tier 1:
+
+## Spatial World and Movement
+
+I want an actual map yes, but I don't want it entirely pre-made. I want more of something where I define the skeleton 
+by giving the LLM different hub locations. For example "Residential" "Commercial" etc. The AI can then define "spokes" 
+of those hubs, and those spokes can have further spokes within them. This allows there to be some novelty to every playthrough.
+
+I also want NPCs to be able to travel between these places, the AI LLM that controls them should know what it is able to do. This is only for NPCs in the scene though, when off-screen they don't decide (that would be the narrator/GM deciding).
+
+Triggers that occur between travel should probably be random generated in-code, so an event can be triggered then the GM decides what actually will happen.
+
+And yes, some places are locked, need reputation etc. 
+
+
+## Turn/Phase structure
+
+This sounds good, travelling between zones should cost a pre-defined and predictable unit of time, and at the end of a scene the GM can decide how much time passed.
+
+Scenes will be triggered upon entering a location and engaging with someone. There should be a chance of a random event occuring when entering a location too, which would trigger a scene without the player deciding to trigger it
+
+
+## Resource Management
+
+We don't need to be granular on food and rations. I don't want to get too granular on this by addingn encumbrance. The only resource I want would be HP, energy, and gold.
+
+## Rest & Recovery system
+
+Yes this is something we should have, travel should cost some energy (not much), energy used can be determined post-scene by the GM
+
+
+
+Tier 2:
+
+## Day/Night Cycle
+
+We don't need to be too detailed on this, just things like certain locations having times they're available, and the time of day being considered by the GM when creating things (Just pass it throuhg as a variable to  it)
+
+## Crafting / Item Enhancement
+
+No, not necessary. Exploration yields new items, not upgrading ucrrent ones
+
+## Reputation Consequences
+
+Has absolutely, we'd pass this through as a variable and keep it stored. I like this idea of reputation being something used.
+
+## Stealth & Detection
+
+I don't think we need to go in depth on this, just something where the player gets notified they're entering an area that's restricted (Maybe we define for a location when creating it if it's restricted, and when)
+
+Then they can choose to go inside. From here the GM and AI would take over and we'd use the same random event + GM mechanic to determine what happens, or the player can then explore if no random event triggers
+
+## Dialogue Skill checks 
+
+I think this is already covered, but I don't want to change what we already have planned
+
+
+Tier 3:
+
+## Procedural events
+
+Yep, but we don't use an event table. We just have a strong structure that the AI uses to create the event.
+
+## Property / Base system
+
+Yes, 100%. I want a property system in the game, upgrading it, getting a better one. absolutely needs to be a mechanic.
+
+## Companion Management
+
+Yeah this sounds good, let's write it down as an idea and we can figure out what to do with it later.
+
+## Contract / Bounty Board
+
+Let's put this down as ann idea as well because I know I will want to do something similar like this.
