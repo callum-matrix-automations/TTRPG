@@ -10,6 +10,8 @@ import {
   ScrollText,
   Flag,
   Shield,
+  Map,
+  Home,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
@@ -27,8 +29,11 @@ import NarrativePanel from "@/components/panels/NarrativePanel";
 import NpcPanel from "@/components/panels/NpcPanel";
 import QuestLog from "@/components/panels/QuestLog";
 import FactionReputation from "@/components/panels/FactionReputation";
+import WorldMap from "@/components/panels/WorldMap";
+import PropertyPanel from "@/components/panels/PropertyPanel";
+import { ToastTriggerPanel } from "@/components/shared/ToastSystem";
 
-type LeftTab = "character" | "party" | "inventory" | "gear" | "relationships";
+type LeftTab = "character" | "party" | "inventory" | "gear" | "relationships" | "map" | "property";
 type RightTab = "npc" | "quests" | "factions";
 
 const leftTabs: { id: LeftTab; icon: typeof User; label: string }[] = [
@@ -36,6 +41,8 @@ const leftTabs: { id: LeftTab; icon: typeof User; label: string }[] = [
   { id: "party", icon: Shield, label: "Party" },
   { id: "inventory", icon: Backpack, label: "Inventory" },
   { id: "gear", icon: Swords, label: "Equipment" },
+  { id: "map", icon: Map, label: "World Map" },
+  { id: "property", icon: Home, label: "Property" },
   { id: "relationships", icon: Network, label: "Relationships" },
 ];
 
@@ -212,6 +219,8 @@ export default function GameLayout() {
       case "party": return <PartyPanel />;
       case "inventory": return <InventoryPanel />;
       case "gear": return <GearPanel />;
+      case "map": return <WorldMap />;
+      case "property": return <PropertyPanel />;
       case "relationships": return <RelationshipWeb />;
     }
   };
@@ -289,6 +298,9 @@ export default function GameLayout() {
           side="right"
         />
       </div>
+
+      {/* Dev: Toast Trigger Panel */}
+      <ToastTriggerPanel />
     </div>
   );
 }

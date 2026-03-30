@@ -11,8 +11,21 @@ import {
   Timer,
   Siren,
   CalendarCheck,
+  Moon,
+  Play,
+  Loader,
+  Globe,
+  Sparkles,
 } from "lucide-react";
-import { worldState, resources, clocks } from "@/data/placeholder";
+import { worldState, resources, clocks, gamePhase, type GamePhase } from "@/data/placeholder";
+import RestModal from "@/components/modals/RestModal";
+
+const phaseConfig: Record<GamePhase, { label: string; icon: typeof Play; color: string }> = {
+  player_action: { label: "Your Turn", icon: Play, color: "var(--color-gold)" },
+  resolution: { label: "Rolling...", icon: Sparkles, color: "var(--color-purple-light)" },
+  world_response: { label: "Responding", icon: Loader, color: "var(--color-mana)" },
+  world_tick: { label: "World Tick", icon: Globe, color: "var(--color-text-muted)" },
+};
 
 const clockTypeConfig = {
   threat: { icon: Siren, color: "var(--color-danger)", label: "Threat" },
@@ -130,6 +143,10 @@ function ClockDisplay({
 }
 
 export default function TopBar() {
+  const [restOpen, setRestOpen] = useState(false);
+  const phase = phaseConfig[gamePhase];
+  const PhaseIcon = phase.icon;
+
   return (
     <div
       className="flex items-center justify-between px-4 h-10 shrink-0"
@@ -167,12 +184,44 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Center — Clocks */}
+      {/* Center — Phase + Clocks + Rest */}
       <div className="flex items-center gap-5">
+        {/* Phase Indicator */}
+        <div
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          style={{
+            background: `${phase.color}15`,
+            border: `1px solid ${phase.color}33`,
+          }}
+        >
+          <PhaseIcon size={11} style={{ color: phase.color }} />
+          <span className="text-[0.6rem] font-semibold" style={{ color: phase.color }}>
+            {phase.label}
+          </span>
+        </div>
+
         {clocks.map((c) => (
           <ClockDisplay key={c.name} clock={c} />
         ))}
+
+        {/* Rest Button */}
+        <button
+          onClick={() => setRestOpen(true)}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full cursor-pointer transition-all duration-150"
+          style={{
+            background: "var(--color-bg-elevated)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text-muted)",
+          }}
+          title="Rest"
+        >
+          <Moon size={11} />
+          <span className="text-[0.6rem]">Rest</span>
+        </button>
       </div>
+
+      {/* Rest Modal */}
+      {restOpen && <RestModal onClose={() => setRestOpen(false)} />}
 
       {/* Right — Resources */}
       <div className="flex items-center gap-4">

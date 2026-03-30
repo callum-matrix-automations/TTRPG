@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, ChevronDown, Info } from "lucide-react";
+import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, ChevronDown, Info, Zap } from "lucide-react";
 import { playerCharacter } from "@/data/placeholder";
 
 // ── Collapsible Drawer ──
@@ -210,6 +210,8 @@ function StatBlock({
 export default function CharacterSheet() {
   const pc = playerCharacter;
   const hpPercent = (pc.hp.current / pc.hp.max) * 100;
+  const energyPercent = (pc.energy.current / pc.energy.max) * 100;
+  const energyColor = energyPercent > 50 ? "var(--color-mana)" : energyPercent > 25 ? "var(--color-gold)" : "var(--color-danger)";
   const xpPercent = (pc.xp.current / pc.xp.next) * 100;
 
   return (
@@ -258,6 +260,27 @@ export default function CharacterSheet() {
                 width: `${hpPercent}%`,
                 background: "linear-gradient(90deg, var(--color-danger), #f87171)",
                 boxShadow: "0 0 6px rgba(239, 68, 68, 0.4)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Energy Bar (always visible) */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1">
+              <Zap size={12} style={{ color: energyColor }} />
+              <span className="text-[0.65rem] text-[var(--color-text-secondary)]">Energy</span>
+            </div>
+            <span className="stat-value text-xs">{pc.energy.current}/{pc.energy.max}</span>
+          </div>
+          <div className="progress-bar-bg">
+            <div
+              className="progress-bar-fill"
+              style={{
+                width: `${energyPercent}%`,
+                background: energyColor,
+                boxShadow: `0 0 6px ${energyColor}44`,
               }}
             />
           </div>
