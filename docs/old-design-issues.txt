@@ -1,0 +1,44 @@
+One of the main issues is that every mechanic I've bolted on to try and create an RPG is all done through the single prompt that gets sent every message. The only external mechanic is the dice roll and that is just sending a dice roll number, which just gets added to the end.
+
+This has meant that only Opus is able to handle the massive size of the prompts, but even that is weak because it can't do everything at once.
+
+Here's everything I've been trying to get the AI to do, and is currently all being done in one prompt:
+- Tracking Names
+- Tracking HP style points
+- Tracking Physical changes
+- Tracking Mental Changes
+- Tracking Equipment/outfits (Inventory is practically impossible to maintain consistently)
+- Tracking Tiers/State of character
+- Tracking Stats, resources, skills, abilities and status effects.
+- Tracking Quests & hints
+- Act as a GM for the entire RP
+- Create an interesting narrative with plot twists and story beats
+- Play every NPC character encountered
+- Manage NPCs off-screen and have them act independently (Near impossible while also being a GM/Director)
+- Integrating HTML visuals
+- Managing Threshold events/global timers
+- Ensuring Model consistently 
+- Multi-Char Roleplay
+- Getting characters to act a certain way
+- Ceating Random events and an alive world
+- Not treating {{user}} as special or unique (Having a narrator/GM agent might help this as they just won't be told that {{user}} is the player, they'd just be coming up with the most interesting story progression.
+- Managing Time & Economy
+
+
+
+And then it's getting lore all at once, that lore can be broken up also. Some lore just doesn't need to be known by an NPC for example (Why would an NPC know about GM protocols?). A system where lorebook entries are segmented based on who needs to know, and then how MUCH they would know (I can take inspo from the CHIM AI mod for how to manage this)
+
+We can probably also do lorebook length, a model will need to know everything about that model, but a resident doesn't need to or just wouldn't. 
+
+Then there's chat history, I think we should have it be done by scenes instead. SO similar to VOTC where scenes occur. In fact we can set this up to be a full game where the AI has a broad idea (It has the general districts for example), but then it can create actual zones. So the Hubs are pre-coded, but the AI can generate locatioins on the fly, that I then actually click to enter.
+
+The more closed-source this project becomes, the more I can do with it. I can just setup a JSON structure so that I just input what I want, this will be my own personal game engine, rather than me try to standardise it I can have it be capable of exactly what I want.
+
+We can actually build a full world that isn't just the casino if we close source it too. It will be less a tool to RP with AI and more of an actual game.
+
+
+
+---
+
+I think a mechanic that handles transformation should be created, it's such a major theme that it deserves it.
+

@@ -1,0 +1,62 @@
+Identity
+
+Willpower
+
+Aro
+
+Conditioning
+
+Stage
+
+Mental State
+
+Progress (Percentage)
+
+Gender
+
+Height
+
+Assigned Model
+
+Model Code
+
+Template Color
+
+Hair
+
+Face
+
+Eyes
+
+Lips
+
+Makeup
+
+Skin
+
+Chest
+
+Waist
+
+Hips
+
+Assigned
+
+Gen
+
+Hands & Nails
+
+Legs
+
+Feet & Shoes
+
+Voice
+
+Posture
+
+Speech
+
+Equipment
+
+Accessories
+
