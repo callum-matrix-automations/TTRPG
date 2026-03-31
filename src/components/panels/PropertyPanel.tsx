@@ -1,7 +1,11 @@
 "use client";
 
-import { Home, MapPin, Coins, Box, Lock, CheckCircle2, Circle, ArrowUp } from "lucide-react";
+import { Home, MapPin, Coins, Box, Shield, ArrowUp, Wrench, Lock } from "lucide-react";
 import { playerProperty, mapLocations } from "@/data/placeholder";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { GlassHighlight } from "@/components/ui/glass";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
 
 const typeLabels: Record<string, string> = {
   rented_room: "Rented Room",
@@ -16,15 +20,11 @@ export default function PropertyPanel() {
   if (!playerProperty) {
     return (
       <div className="flex flex-col h-full">
-        <div className="panel-header">
-          <Home size={14} className="text-[var(--color-gold)]" />
-          Property
-        </div>
         <div className="panel-content flex items-center justify-center">
           <div className="text-center py-8">
             <Home size={24} className="mx-auto mb-2" style={{ color: "var(--color-text-muted)" }} />
-            <p className="text-xs text-[var(--color-text-muted)]">No property owned</p>
-            <p className="text-[0.6rem] text-[var(--color-text-muted)] mt-1">
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>No property owned</p>
+            <p className="text-[0.6rem] mt-1" style={{ color: "var(--color-text-muted)" }}>
               Visit a boarding house or real estate office to rent or buy property.
             </p>
           </div>
@@ -37,133 +37,120 @@ export default function PropertyPanel() {
   const location = mapLocations.find((l) => l.id === prop.locationId);
   const currentTierIndex = typeProgression.indexOf(prop.type);
   const installedCount = prop.upgrades.filter((u) => u.installed).length;
+  const upgradeProgress = (installedCount / prop.upgrades.length) * 100;
 
   return (
     <div className="flex flex-col h-full">
-      <div className="panel-header">
-        <Home size={14} className="text-[var(--color-gold)]" />
-        Property
-      </div>
       <div className="panel-content space-y-3">
-        {/* Property Header */}
-        <div className="card gold-border-glow">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: "var(--color-gold-subtle)", border: "1px solid var(--color-gold-dim)" }}
-            >
-              <Home size={18} style={{ color: "var(--color-gold)" }} />
-            </div>
-            <div>
-              <h3
-                className="text-sm font-bold"
-                style={{ fontFamily: "var(--font-heading)", color: "var(--color-pink-light)" }}
-              >
-                {prop.name}
-              </h3>
-              <span className="badge" style={{ background: "var(--color-gold-subtle)", color: "var(--color-gold)" }}>
-                {typeLabels[prop.type]}
-              </span>
-            </div>
-          </div>
-        </div>
 
-        {/* Location */}
-        {location && (
-          <div className="flex items-center gap-2 text-[0.65rem]">
-            <MapPin size={11} className="text-[var(--color-text-muted)]" />
-            <span className="text-[var(--color-text-secondary)]">{location.name}</span>
-          </div>
-        )}
+        {/* Property Header — KPI style */}
+        <KpiCard
+          label={typeLabels[prop.type]}
+          value={prop.name}
+          caption={location?.name ?? "Unknown Location"}
+          tone="gold"
+          size="md"
+          icon={<Home size={14} />}
+        />
 
-        {/* Cost */}
-        {prop.monthlyCost && (
-          <div className="flex items-center gap-2 text-[0.65rem]">
-            <Coins size={11} className="text-[var(--color-gold)]" />
-            <span className="text-[var(--color-text-secondary)]">
-              {prop.monthlyCost} gp / month
-            </span>
-          </div>
-        )}
-
-        {/* Stash */}
-        <div className="flex items-center gap-2 text-[0.65rem]">
-          <Box size={11} className="text-[var(--color-text-muted)]" />
-          <span className="text-[var(--color-text-secondary)]">
-            Stash capacity: <span className="stat-value">{prop.stashCapacity}</span> items
-          </span>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-2">
+          <KpiCard
+            label="Monthly Rent"
+            value={prop.monthlyCost ? `$${prop.monthlyCost}` : "Owned"}
+            tone={prop.monthlyCost ? "warning" : "success"}
+            size="sm"
+            compact
+            icon={<Coins size={10} />}
+          />
+          <KpiCard
+            label="Stash Capacity"
+            value={`${prop.stashCapacity} items`}
+            tone="default"
+            size="sm"
+            compact
+            icon={<Box size={10} />}
+          />
         </div>
 
         {/* Features */}
-        <div className="card" style={{ borderLeft: "3px solid var(--color-success)" }}>
-          <div className="flex items-center gap-1.5">
-            <Lock size={11} className="text-[var(--color-success)]" />
-            <span className="text-xs text-[var(--color-success)]">Safe Rest Location</span>
-          </div>
-          <p className="text-[0.6rem] text-[var(--color-text-muted)] mt-0.5">
-            You can take a long rest here without cost.
-          </p>
-        </div>
+        <ChipRow>
+          {prop.safeRest && (
+            <AvatarChip label="Safe Rest" variant="success" size="sm" icon={<Shield size={10} />} />
+          )}
+          <AvatarChip label={location?.name ?? "Unknown"} variant="default" size="sm" icon={<MapPin size={10} />} />
+          {prop.monthlyCost && (
+            <AvatarChip label={`$${prop.monthlyCost}/mo`} variant="warning" size="sm" icon={<Coins size={10} />} />
+          )}
+        </ChipRow>
 
         {/* Upgrades */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-              Upgrades
-            </span>
-            <span className="stat-value text-[0.6rem]">
-              {installedCount}/{prop.upgrades.length}
-            </span>
-          </div>
-          <div className="space-y-1.5">
+        <GlassHighlight title={`Upgrades (${installedCount}/${prop.upgrades.length})`} accentColor="var(--color-purple-light)">
+          <ProgressBar value={upgradeProgress} color="var(--color-purple-light)" glowColor="rgba(167,139,250,0.3)" className="mb-3" />
+          <div className="space-y-2">
             {prop.upgrades.map((upgrade) => (
               <div
                 key={upgrade.name}
-                className="flex items-start gap-2.5 px-2.5 py-2 rounded-md"
+                className="flex items-start gap-2.5 px-3 py-2 rounded-lg transition-all duration-150"
                 style={{
-                  background: "var(--color-bg-elevated)",
-                  border: `1px solid ${upgrade.installed ? "var(--color-success)" : "var(--color-border-subtle)"}33`,
-                  opacity: upgrade.installed ? 1 : 0.7,
+                  background: upgrade.installed ? "rgba(34,197,94,0.06)" : "rgba(13,8,20,0.3)",
+                  border: `1px solid ${upgrade.installed ? "rgba(34,197,94,0.2)" : "var(--color-border-subtle)"}`,
+                  opacity: upgrade.installed ? 1 : 0.75,
                 }}
               >
-                {upgrade.installed ? (
-                  <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
-                ) : (
-                  <Circle size={13} className="mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
-                )}
-                <div className="flex-1">
-                  <span className="text-[0.65rem] font-medium text-[var(--color-text-primary)]">
-                    {upgrade.name}
-                  </span>
-                  <p className="text-[0.55rem] text-[var(--color-text-muted)]">{upgrade.description}</p>
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                  style={{
+                    background: upgrade.installed ? "rgba(34,197,94,0.12)" : "var(--color-bg-elevated)",
+                    border: `1px solid ${upgrade.installed ? "rgba(34,197,94,0.3)" : "var(--color-border)"}`,
+                    color: upgrade.installed ? "var(--color-success)" : "var(--color-text-muted)",
+                  }}
+                >
+                  {upgrade.installed ? <Shield size={12} /> : <Wrench size={12} />}
                 </div>
-                {!upgrade.installed && (
-                  <span className="stat-value text-[0.6rem] shrink-0">{upgrade.cost} gp</span>
-                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[0.65rem] font-semibold" style={{ color: upgrade.installed ? "var(--color-success)" : "var(--color-text-primary)" }}>
+                      {upgrade.name}
+                    </span>
+                    {!upgrade.installed && (
+                      <span className="stat-value text-[0.55rem]" style={{ color: "var(--color-gold)" }}>${upgrade.cost}</span>
+                    )}
+                  </div>
+                  <p className="text-[0.55rem] mt-0.5" style={{ color: "var(--color-text-muted)" }}>{upgrade.description}</p>
+                  {upgrade.installed && (
+                    <div className="mt-1">
+                      <AvatarChip label="Installed" variant="success" size="xs" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </GlassHighlight>
 
-        {/* Upgrade Property Tier */}
+        {/* Upgrade Tier */}
         {currentTierIndex < typeProgression.length - 1 && (
           <div
-            className="rounded-lg p-3 text-center cursor-pointer transition-all duration-150"
-            style={{
-              background: "var(--color-bg-elevated)",
-              border: "1px dashed var(--color-border)",
-            }}
+            className="rounded-xl p-4 text-center cursor-pointer transition-all duration-150 group"
+            style={{ background: "var(--color-bg-elevated)", border: "1px dashed var(--color-border)" }}
             onClick={() => console.log("Upgrade property tier")}
           >
-            <ArrowUp size={16} className="mx-auto mb-1" style={{ color: "var(--color-purple-light)" }} />
-            <span className="text-[0.65rem] text-[var(--color-purple-light)]">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all duration-200 group-hover:scale-110"
+              style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.3)", color: "var(--color-purple-light)" }}
+            >
+              <ArrowUp size={18} />
+            </div>
+            <span className="text-xs font-semibold" style={{ color: "var(--color-purple-light)" }}>
               Upgrade to {typeLabels[typeProgression[currentTierIndex + 1]]}
             </span>
-            <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-0.5">
-              Visit a real estate office to upgrade
+            <p className="text-[0.55rem] mt-1" style={{ color: "var(--color-text-muted)" }}>
+              Visit a real estate office to upgrade your accommodation
             </p>
           </div>
         )}
+
       </div>
     </div>
   );

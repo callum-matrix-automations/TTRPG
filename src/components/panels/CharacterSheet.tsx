@@ -2,68 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, ChevronDown, Info, Zap } from "lucide-react";
+import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, Info, Zap } from "lucide-react";
 import { playerCharacter, transformation } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
 import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
-
-// ── Collapsible Drawer ──
-function Drawer({
-  title,
-  defaultOpen = false,
-  count,
-  children,
-}: {
-  title: string;
-  defaultOpen?: boolean;
-  count?: number;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <div>
-      <button
-        onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between py-1.5 cursor-pointer"
-        style={{ borderBottom: "1px solid var(--color-border-subtle)" }}
-      >
-        <div className="flex items-center gap-2">
-          <h4 className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-            {title}
-          </h4>
-          {count !== undefined && (
-            <span
-              className="badge"
-              style={{ background: "var(--color-gold-subtle)", color: "var(--color-gold-light)" }}
-            >
-              {count}
-            </span>
-          )}
-        </div>
-        <ChevronDown
-          size={14}
-          className="transition-transform duration-200"
-          style={{
-            color: "var(--color-text-muted)",
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-          }}
-        />
-      </button>
-      <div
-        className="overflow-hidden transition-all duration-200 ease-in-out"
-        style={{
-          maxHeight: open ? "2000px" : "0px",
-          opacity: open ? 1 : 0,
-        }}
-      >
-        <div className="pt-2 pb-1">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 // ── Stat Block with Modifier Popup (portaled) ──
 function StatBlock({
@@ -255,16 +200,7 @@ export default function CharacterSheet() {
             </div>
             <span className="stat-value text-xs">{pc.hp.current}/{pc.hp.max}</span>
           </div>
-          <div className="progress-bar-bg">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${hpPercent}%`,
-                background: "linear-gradient(90deg, var(--color-danger), #f87171)",
-                boxShadow: "0 0 6px rgba(239, 68, 68, 0.4)",
-              }}
-            />
-          </div>
+          <ProgressBar value={hpPercent} color="var(--color-danger)" glowColor="rgba(239,68,68,0.4)" />
         </div>
 
         {/* Energy Bar (always visible) */}
@@ -276,16 +212,7 @@ export default function CharacterSheet() {
             </div>
             <span className="stat-value text-xs">{pc.energy.current}/{pc.energy.max}</span>
           </div>
-          <div className="progress-bar-bg">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${energyPercent}%`,
-                background: energyColor,
-                boxShadow: `0 0 6px ${energyColor}44`,
-              }}
-            />
-          </div>
+          <ProgressBar value={energyPercent} color={energyColor} glowColor={`${energyColor}44`} />
         </div>
 
         {/* XP Bar (always visible) */}
@@ -299,133 +226,160 @@ export default function CharacterSheet() {
               {pc.xp.current.toLocaleString()}/{pc.xp.next.toLocaleString()}
             </span>
           </div>
-          <div className="progress-bar-bg">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${xpPercent}%`,
-                background: "linear-gradient(90deg, var(--color-xp), #c4b5fd)",
-                boxShadow: "0 0 6px rgba(167, 139, 250, 0.4)",
-              }}
-            />
-          </div>
+          <ProgressBar value={xpPercent} color="var(--color-xp)" glowColor="rgba(167,139,250,0.4)" />
         </div>
 
-        {/* ── DRAWERS ── */}
+        {/* ── ACCORDION SECTIONS ── */}
+        <Accordion type="multiple" defaultValue={["attributes", "appearance"]} className="-space-y-px">
 
-        {/* Attributes (STR/DEX/CON/INT/WIS/CHA) */}
-        <Drawer title="Attributes" defaultOpen>
-          <div className="grid grid-cols-3 gap-1.5">
-            {Object.entries(pc.stats).map(([key, val]) => (
-              <StatBlock key={key} label={key} score={val.score} mod={val.mod} modifiers={val.modifiers} />
-            ))}
-          </div>
-        </Drawer>
-
-        {/* Skills */}
-        <Drawer title="Skills" count={pc.skills.length}>
-          <div className="space-y-1">
-            {pc.skills.map((skill) => (
-              <div
-                key={skill.name}
-                className="flex items-center justify-between py-0.5 px-2 rounded text-xs"
-                style={{ background: "var(--color-bg-elevated)" }}
-              >
-                <div className="flex items-center gap-1.5">
-                  {skill.expertise && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)]" />
-                  )}
-                  {skill.proficient && !skill.expertise && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-purple-light)]" />
-                  )}
-                  {!skill.proficient && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-bg-deep)]" />
-                  )}
-                  <span className="text-[var(--color-text-secondary)]">{skill.name}</span>
+          {/* Attributes */}
+          <AccordionItem value="attributes" className="px-3 first:rounded-t-lg last:rounded-b-lg" style={{ background: "var(--color-bg-base)", borderColor: "var(--color-border)" }}>
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ background: "var(--color-gold-subtle)", color: "var(--color-gold)" }}>
+                  <Star size={16} />
                 </div>
-                <span className="stat-value text-xs">
-                  {skill.mod >= 0 ? `+${skill.mod}` : skill.mod}
-                </span>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>Attributes</span>
+                  <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>STR · DEX · CON · INT · WIS · CHA</span>
+                </div>
               </div>
-            ))}
-          </div>
-        </Drawer>
+            </AccordionTrigger>
+            <AccordionContent className="ps-12">
+              <div className="grid grid-cols-3 gap-1.5">
+                {Object.entries(pc.stats).map(([key, val]) => (
+                  <KpiCard
+                    key={key}
+                    label={key}
+                    value={val.score}
+                    delta={val.mod >= 0 ? `+${val.mod}` : `${val.mod}`}
+                    trend={val.mod > 0 ? "up" : val.mod < 0 ? "down" : "flat"}
+                    tone="gold"
+                    size="sm"
+                    compact
+                  />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Abilities (Class Features) */}
-        <Drawer title="Abilities" count={pc.abilities.length}>
-          <div className="space-y-1.5">
-            {pc.abilities.map((ability) => (
-              <div key={ability.name} className="card">
-                <div className="flex items-center justify-between mb-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen size={11} className="text-[var(--color-purple-light)]" />
-                    <span className="text-xs font-medium text-[var(--color-text-primary)]">
-                      {ability.name}
-                    </span>
-                  </div>
-                  <span
-                    className="badge"
-                    style={{
-                      background: "var(--color-bg-deep)",
-                      color: "var(--color-text-muted)",
-                      border: "1px solid var(--color-border-subtle)",
-                    }}
-                  >
-                    {ability.source}
-                  </span>
+          {/* Skills */}
+          <AccordionItem value="skills" className="px-3 first:rounded-t-lg last:rounded-b-lg" style={{ background: "var(--color-bg-base)", borderColor: "var(--color-border)" }}>
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(96,165,250,0.1)", color: "var(--color-mana)" }}>
+                  <Info size={16} />
                 </div>
-                <p className="text-[0.6rem] text-[var(--color-text-secondary)] leading-relaxed">
-                  {ability.description}
-                </p>
-                {ability.uses && (
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className="text-[0.55rem] text-[var(--color-text-muted)]">Uses:</span>
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: ability.uses.max }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-2.5 h-2.5 rounded-full border"
-                          style={{
-                            borderColor: "var(--color-border-strong)",
-                            background: i < ability.uses!.current ? "var(--color-gold)" : "var(--color-bg-deep)",
-                            boxShadow: i < ability.uses!.current ? "0 0 4px var(--color-gold-glow)" : "none",
-                          }}
-                        />
-                      ))}
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>Skills</span>
+                  <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>{pc.skills.length} skills</span>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="ps-12">
+              <div className="space-y-1">
+                {pc.skills.map((skill) => (
+                  <div key={skill.name} className="flex items-center justify-between py-0.5 px-2 rounded text-xs" style={{ background: "var(--color-bg-elevated)" }}>
+                    <div className="flex items-center gap-1.5">
+                      {skill.expertise && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)]" />}
+                      {skill.proficient && !skill.expertise && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-purple-light)]" />}
+                      {!skill.proficient && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-bg-deep)]" />}
+                      <span className="text-[var(--color-text-secondary)]">{skill.name}</span>
                     </div>
-                    <span className="text-[0.55rem] text-[var(--color-text-muted)]">
-                      ({ability.uses.recharge})
-                    </span>
+                    <span className="stat-value text-xs">{skill.mod >= 0 ? `+${skill.mod}` : skill.mod}</span>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-        </Drawer>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Status Effects */}
-        <Drawer title="Status Effects" count={pc.statusEffects.length}>
-          {pc.statusEffects.length === 0 ? (
-            <p className="text-[0.65rem] text-[var(--color-text-muted)] italic">No active effects</p>
-          ) : (
-            <ChipRow>
-              {pc.statusEffects.map((effect) => (
-                <AvatarChip
-                  key={effect.name}
-                  label={effect.name}
-                  variant={effect.type === "buff" ? "success" : "danger"}
-                  icon={<Sparkles size={10} />}
-                  size="sm"
-                />
-              ))}
-            </ChipRow>
-          )}
-        </Drawer>
+          {/* Abilities */}
+          <AccordionItem value="abilities" className="px-3 first:rounded-t-lg last:rounded-b-lg" style={{ background: "var(--color-bg-base)", borderColor: "var(--color-border)" }}>
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(167,139,250,0.1)", color: "var(--color-purple-light)" }}>
+                  <BookOpen size={16} />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>Abilities</span>
+                  <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>{pc.abilities.length} abilities</span>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="ps-12">
+              <div className="space-y-1.5">
+                {pc.abilities.map((ability) => (
+                  <KpiCard
+                    key={ability.name}
+                    label={ability.name}
+                    value={ability.uses ? `${ability.uses.current}/${ability.uses.max}` : "Passive"}
+                    caption={ability.uses ? ability.uses.recharge : ability.source}
+                    delta={ability.source}
+                    trend="flat"
+                    tone="purple"
+                    size="sm"
+                    compact
+                    icon={<BookOpen size={12} />}
+                  />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Appearance */}
-        <Drawer title="Appearance" defaultOpen>
-          <AppearanceView appearance={pc.appearance} transformation={transformation} name={pc.name} portrait="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" />
-        </Drawer>
+          {/* Status Effects */}
+          <AccordionItem value="status" className="px-3 first:rounded-t-lg last:rounded-b-lg" style={{ background: "var(--color-bg-base)", borderColor: "var(--color-border)" }}>
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(34,197,94,0.1)", color: "var(--color-success)" }}>
+                  <Sparkles size={16} />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>Status Effects</span>
+                  <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>{pc.statusEffects.length} active</span>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="ps-12">
+              {pc.statusEffects.length === 0 ? (
+                <p className="text-[0.65rem] text-[var(--color-text-muted)] italic">No active effects</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {pc.statusEffects.map((effect) => (
+                    <KpiCard
+                      key={effect.name}
+                      label={effect.name}
+                      value={effect.type === "buff" ? "Buff" : "Debuff"}
+                      caption={effect.duration}
+                      tone={effect.type === "buff" ? "success" : "danger"}
+                      size="sm"
+                      compact
+                      icon={<Sparkles size={12} />}
+                    />
+                  ))}
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Appearance */}
+          <AccordionItem value="appearance" className="px-3 first:rounded-t-lg last:rounded-b-lg" style={{ background: "var(--color-bg-base)", borderColor: "var(--color-border)" }}>
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(255,180,220,0.1)", color: "var(--color-pink)" }}>
+                  <Eye size={16} />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>Appearance</span>
+                  <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>Physical description</span>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="ps-12">
+              <AppearanceView appearance={pc.appearance} transformation={transformation} name={pc.name} portrait="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" />
+            </AccordionContent>
+          </AccordionItem>
+
+        </Accordion>
       </div>
     </div>
   );

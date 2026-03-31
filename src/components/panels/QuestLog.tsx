@@ -6,6 +6,7 @@ import { questLog, type Quest } from "@/data/placeholder";
 import { AvatarChip } from "@/components/ui/avatar-chip";
 import QuestModal from "@/components/modals/QuestModal";
 import { HoverRevealCard, RevealRow } from "@/components/ui/hover-reveal-card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 const statusColors: Record<string, string> = {
   active: "var(--color-gold)",
@@ -39,9 +40,7 @@ function QuestCard({ quest, onOpenModal }: { quest: Quest; onOpenModal: () => vo
           <p className="text-[0.6rem] text-[var(--color-text-secondary)] line-clamp-1">{quest.description}</p>
           {/* Progress bar */}
           <div className="flex items-center gap-2 mt-1.5">
-            <div className="progress-bar-bg flex-1" style={{ height: "3px" }}>
-              <div className="progress-bar-fill" style={{ width: `${(completedCount / quest.objectives.length) * 100}%`, background: statusColor }} />
-            </div>
+            <ProgressBar value={(completedCount / quest.objectives.length) * 100} color={statusColor} height={3} className="flex-1" />
             <span className="stat-value text-[0.5rem]">{completedCount}/{quest.objectives.length}</span>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { Flag, MapPin, Crown } from "lucide-react";
 import { factions, type Faction } from "@/data/placeholder";
 import FactionModal from "@/components/modals/FactionModal";
 import { HoverRevealCard, RevealRow, RevealBar } from "@/components/ui/hover-reveal-card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 function FactionCard({ faction, onOpenModal }: { faction: Faction; onOpenModal: () => void }) {
   const percent = ((faction.reputation + 100) / 200) * 100;
@@ -22,9 +23,7 @@ function FactionCard({ faction, onOpenModal }: { faction: Faction; onOpenModal: 
             <span className="text-xs font-medium" style={{ color: faction.color }}>{faction.name}</span>
             <span className="stat-value text-[0.6rem]">{faction.reputation > 0 ? `+${faction.reputation}` : faction.reputation}</span>
           </div>
-          <div className="progress-bar-bg">
-            <div className="progress-bar-fill" style={{ width: `${percent}%`, background: faction.color, boxShadow: `0 0 6px ${faction.color}44` }} />
-          </div>
+          <ProgressBar value={percent} color={faction.color} glowColor={`${faction.color}44`} />
           <span className="text-[0.55rem] mt-0.5 inline-block" style={{ color: faction.color }}>{faction.tier}</span>
         </div>
       }

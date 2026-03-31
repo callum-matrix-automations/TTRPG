@@ -183,13 +183,18 @@ export const inventory: {
 
 // ── Gear ──
 
-export const gear = [
-  { slot: "Outerwear", item: "Hoodie", icon: "Shirt" },
-  { slot: "Top", item: "T-Shirt", icon: "Shirt" },
-  { slot: "Bottoms", item: "Jeans", icon: "Shirt" },
-  { slot: "Footwear", item: "Sneakers", icon: "Footprints" },
-  { slot: "Accessories", item: "Watch", icon: "CircleDot" },
-  { slot: "Bag", item: "Backpack", icon: "Backpack" },
+export const gear: {
+  slot: string; item: string; icon: string;
+  image: string | null; effects: string[];
+}[] = [
+  { slot: "Outerwear", item: "Grey Zip Hoodie", icon: "Shirt", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=80", effects: ["+1 Stealth (blends in)"] },
+  { slot: "Top", item: "Black T-Shirt", icon: "Shirt", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", effects: [] },
+  { slot: "Bottoms", item: "Dark Wash Jeans", icon: "Shirt", image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80", effects: [] },
+  { slot: "Footwear", item: "White Sneakers", icon: "Footprints", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80", effects: ["+1 DEX (good grip)"] },
+  { slot: "Accessories", item: "Digital Watch", icon: "CircleDot", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80", effects: ["Track time accurately"] },
+  { slot: "Bag", item: "Canvas Backpack", icon: "Backpack", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80", effects: ["+5 Carry capacity"] },
+  { slot: "Headwear", item: "—", icon: "CircleDot", image: null, effects: [] },
+  { slot: "Jewellery", item: "—", icon: "Gem", image: null, effects: [] },
 ];
 
 // ── NPC Tier System ──
@@ -956,4 +961,18 @@ export type Property = {
   safeRest: boolean;
 };
 
-export const playerProperty: Property | null = null; // Player doesn't own property yet
+export const playerProperty: Property | null = {
+  id: "prop-001",
+  name: "Room 714 — Hotel Towers",
+  type: "rented_room",
+  locationId: "casino-hotel",
+  monthlyCost: 200,
+  stashCapacity: 8,
+  upgrades: [
+    { name: "Reinforced Lock", description: "Better security for your belongings. Harder for staff to 'inspect' your room.", installed: true, cost: 150 },
+    { name: "Signal Booster", description: "Improves phone signal inside the Casino complex. Partial contact with the outside.", installed: false, cost: 300 },
+    { name: "Hidden Compartment", description: "A concealed space behind the wardrobe. Staff won't find items stored here.", installed: false, cost: 500 },
+    { name: "Panic Button", description: "Emergency alert connected to the City Watch. Whether they'll actually come is another question.", installed: false, cost: 1000 },
+  ],
+  safeRest: true,
+};

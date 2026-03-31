@@ -1,0 +1,29 @@
+Build things out so quests are modular in the world, the game engine focuses on just being able to slot in any scenario I want, and load as many of them as I want.
+
+Then I can get ideas from the infinite worlds app
+
+
+
+---
+
+Planned Locations/Dungeons/Questlines
+
+City Centre:
+- Casino Royale
+- Salon
+- Night Club
+
+
+University:
+- AO Club
+- G Club
+- CL Club
+
+Business District:
+- BT Industries
+- BT Competitor
+
+
+Misc Locations:
+- Beach Club
+- Hotel / Manor House

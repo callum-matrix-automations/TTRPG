@@ -8,6 +8,7 @@ import {
 import { type Faction, factions } from "@/data/placeholder";
 import { GlassHighlight, GlassLinkRow } from "@/components/ui/glass";
 import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 const stanceColors: Record<string, string> = {
   Allied: "var(--color-success)",
@@ -127,12 +128,7 @@ export default function FactionModal({
                   {faction.reputation > 0 ? `+${faction.reputation}` : faction.reputation}
                 </span>
               </div>
-              <div className="progress-bar-bg" style={{ height: "8px" }}>
-                <div
-                  className="progress-bar-fill"
-                  style={{ width: `${percent}%`, background: faction.color, boxShadow: `0 0 8px ${faction.color}44` }}
-                />
-              </div>
+              <ProgressBar value={percent} color={faction.color} glowColor={`${faction.color}44`} height={8} />
               <div className="flex justify-between mt-1">
                 <span className="text-[0.5rem] text-[var(--color-text-muted)]">Hostile</span>
                 <span className="text-[0.5rem] text-[var(--color-text-muted)]">Neutral</span>

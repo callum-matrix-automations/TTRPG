@@ -1,76 +1,241 @@
-Ok, I'm going to address all of those items.
+Take this card component, and smoothly integrate it into the following
 
-Tier 1:
+You are given a task to integrate an existing React component in the codebase
 
-## Spatial World and Movement
+The codebase should support:
+- shadcn project structure  
+- Tailwind CSS
+- Typescript
 
-I want an actual map yes, but I don't want it entirely pre-made. I want more of something where I define the skeleton 
-by giving the LLM different hub locations. For example "Residential" "Commercial" etc. The AI can then define "spokes" 
-of those hubs, and those spokes can have further spokes within them. This allows there to be some novelty to every playthrough.
+If it doesn't, provide instructions on how to setup project via shadcn CLI, install Tailwind or Typescript.
 
-I also want NPCs to be able to travel between these places, the AI LLM that controls them should know what it is able to do. This is only for NPCs in the scene though, when off-screen they don't decide (that would be the narrator/GM deciding).
+Determine the default path for components and styles. 
+If default path for components is not /components/ui, provide instructions on why it's important to create this folder
+Copy-paste this component to /components/ui folder:
+```tsx
+kpi-card.tsx
+'use client';
 
-Triggers that occur between travel should probably be random generated in-code, so an event can be triggered then the GM decides what actually will happen.
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-And yes, some places are locked, need reputation etc. 
+type Tone = 'default' | 'primary' | 'success' | 'warning' | 'danger';
+type Size = 'sm' | 'md' | 'lg';
+type Trend = 'up' | 'down' | 'flat';
+
+export type KpiCardProps = {
+  /** Small label/title */
+  label: string;
+  /** Main metric (formatted) */
+  value: string | number;
+  /** Delta in %, number or string -> shown in green/red */
+  delta?: number | string;
+  /** Visual trend indicator */
+  trend?: Trend;
+  /** Sub text under value (e.g., “vs Previous 30 days”) */
+  caption?: string;
+  /** Optional top-right icon */
+  icon?: React.ReactNode;
+  /** Visual tone */
+  tone?: Tone;
+  /** Size */
+  size?: Size;
+  /** Compact density */
+  compact?: boolean;
+  className?: string;
+};
+
+/** tone -> classes */
+const toneMap: Record<
+  Tone,
+  { card: string; value: string; deltaUp: string; deltaDown: string }
+> = {
+  default: {
+    card: 'bg-zinc-100/70 dark:bg-zinc-900/50 ring-1 ring-zinc-200 dark:ring-zinc-800',
+    value: 'text-zinc-950 dark:text-zinc-50',
+    deltaUp: 'text-emerald-600 dark:text-emerald-400',
+    deltaDown: 'text-rose-600 dark:text-rose-400',
+  },
+  primary: {
+    card: 'bg-blue-100/70 dark:bg-blue-900/30 ring-1 ring-blue-200/60 dark:ring-blue-800/60',
+    value: 'text-blue-700 dark:text-blue-200',
+    deltaUp: 'text-emerald-600 dark:text-emerald-400',
+    deltaDown: 'text-rose-600 dark:text-rose-400',
+  },
+  success: {
+    card: 'bg-emerald-100/70 dark:bg-emerald-900/30 ring-1 ring-emerald-200/60 dark:ring-emerald-800/60',
+    value: 'text-emerald-700 dark:text-emerald-200',
+    deltaUp: 'text-emerald-700 dark:text-emerald-300',
+    deltaDown: 'text-rose-600 dark:text-rose-400',
+  },
+  warning: {
+    card: 'bg-amber-100/70 dark:bg-amber-900/30 ring-1 ring-amber-200/60 dark:ring-amber-800/60',
+    value: 'text-amber-700 dark:text-amber-200',
+    deltaUp: 'text-emerald-600 dark:text-emerald-400',
+    deltaDown: 'text-rose-600 dark:text-rose-400',
+  },
+  danger: {
+    card: 'bg-rose-100/70 dark:bg-rose-900/30 ring-1 ring-rose-200/60 dark:ring-rose-800/60',
+    value: 'text-rose-700 dark:text-rose-200',
+    deltaUp: 'text-emerald-600 dark:text-emerald-400',
+    deltaDown: 'text-rose-700 dark:text-rose-300',
+  },
+};
+
+const sizeMap: Record<
+  Size,
+  { pad: string; label: string; value: string; caption: string; icon: string }
+> = {
+  sm: {
+    pad: 'p-3',
+    label: 'text-xs',
+    value: 'text-xl',
+    caption: 'text-[11px]',
+    icon: 'h-4 w-4',
+  },
+  md: {
+    pad: 'p-4',
+    label: 'text-sm',
+    value: 'text-2xl',
+    caption: 'text-xs',
+    icon: 'h-5 w-5',
+  },
+  lg: {
+    pad: 'p-6',
+    label: 'text-sm',
+    value: 'text-3xl',
+    caption: 'text-sm',
+    icon: 'h-6 w-6',
+  },
+};
+
+/** Minimal, dependency‑light KPI card */
+export function KpiCard({
+  label,
+  value,
+  delta,
+  trend = 'flat',
+  caption,
+  icon,
+  tone = 'primary',
+  size = 'md',
+  compact = false,
+  className,
+}: KpiCardProps) {
+  const t = toneMap[tone];
+  const s = sizeMap[size];
+
+  const deltaValue =
+    typeof delta === 'number' ? `${delta > 0 ? '+' : ''}${delta}%` : delta; // allow pre‑formatted strings
+
+  const isUp = trend === 'up';
+  const isDown = trend === 'down';
+  const DeltaIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
+
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-xl shadow-sm',
+        t.card,
+        s.pad,
+        !compact && 'min-h-[92px]',
+        className
+      )}
+    >
+      {/* subtle corner pulse like your screenshot */}
+      <span className='pointer-events-none absolute -right-6 -top-6 inline-flex h-16 w-16 rounded-full bg-black/5 dark:bg-white/5' />
+      <span className='pointer-events-none absolute -right-2 -top-2 inline-flex h-8 w-8 rounded-full bg-black/5 dark:bg-white/5' />
+
+      <div className='flex items-start justify-between gap-3'>
+        <div className='space-y-1'>
+          <div
+            className={cn(
+              'font-medium text-zinc-700 dark:text-zinc-300',
+              s.label
+            )}
+          >
+            {label}
+          </div>
+          <div className={cn('font-semibold tracking-tight', t.value, s.value)}>
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </div>
+          {caption ? (
+            <div className={cn('text-zinc-500 dark:text-zinc-400', s.caption)}>
+              {caption}
+            </div>
+          ) : null}
+        </div>
+
+        <div className='flex items-center gap-2'>
+          {typeof deltaValue !== 'undefined' && (
+            <div
+              className={cn(
+                'flex items-center gap-1 text-sm font-medium',
+                isUp
+                  ? t.deltaUp
+                  : isDown
+                    ? t.deltaDown
+                    : 'text-zinc-500 dark:text-zinc-400'
+              )}
+            >
+              <DeltaIcon className='h-4 w-4' aria-hidden />
+              {deltaValue}
+            </div>
+          )}
+          {icon ? (
+            <div
+              className={cn(
+                'rounded-full bg-white/40 p-1 dark:bg-white/10',
+                s.icon
+              )}
+            >
+              {icon}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* tiny baseline bar (optional – matches screenshot) */}
+      <div className='bg-current/40 mt-3 h-0.5 w-16 rounded opacity-60' />
+    </div>
+  );
+}
 
 
-## Turn/Phase structure
+demo.tsx
+import { KpiCard } from '@/components/ui/kpi-card';
 
-This sounds good, travelling between zones should cost a pre-defined and predictable unit of time, and at the end of a scene the GM can decide how much time passed.
+export default function KpiNegative() {
+  return (
+    <KpiCard
+      label='Bounce Rate'
+      value='62.4%'
+      delta={-8.2}
+      trend='down'
+      caption='vs Previous 30 Days'
+      tone='danger'
+    />
+  );
+}
 
-Scenes will be triggered upon entering a location and engaging with someone. There should be a chance of a random event occuring when entering a location too, which would trigger a scene without the player deciding to trigger it
+```
 
-
-## Resource Management
-
-We don't need to be granular on food and rations. I don't want to get too granular on this by addingn encumbrance. The only resource I want would be HP, energy, and gold.
-
-## Rest & Recovery system
-
-Yes this is something we should have, travel should cost some energy (not much), energy used can be determined post-scene by the GM
-
-
-
-Tier 2:
-
-## Day/Night Cycle
-
-We don't need to be too detailed on this, just things like certain locations having times they're available, and the time of day being considered by the GM when creating things (Just pass it throuhg as a variable to  it)
-
-## Crafting / Item Enhancement
-
-No, not necessary. Exploration yields new items, not upgrading ucrrent ones
-
-## Reputation Consequences
-
-Has absolutely, we'd pass this through as a variable and keep it stored. I like this idea of reputation being something used.
-
-## Stealth & Detection
-
-I don't think we need to go in depth on this, just something where the player gets notified they're entering an area that's restricted (Maybe we define for a location when creating it if it's restricted, and when)
-
-Then they can choose to go inside. From here the GM and AI would take over and we'd use the same random event + GM mechanic to determine what happens, or the player can then explore if no random event triggers
-
-## Dialogue Skill checks 
-
-I think this is already covered, but I don't want to change what we already have planned
+Install NPM dependencies:
+```bash
+lucide-react
+```
 
 
-Tier 3:
+--- 
 
-## Procedural events
-
-Yep, but we don't use an event table. We just have a strong structure that the AI uses to create the event.
-
-## Property / Base system
-
-Yes, 100%. I want a property system in the game, upgrading it, getting a better one. absolutely needs to be a mechanic.
-
-## Companion Management
-
-Yeah this sounds good, let's write it down as an idea and we can figure out what to do with it later.
-
-## Contract / Bounty Board
-
-Let's put this down as ann idea as well because I know I will want to do something similar like this.
+- Character attribuytes
+- Character Abilities
+- Character Status Effects
+- Transformation tab faction
+- Companion Attributes
+- Companion Abilities
+- Inventory equipped
+- Known connections
+- NPC Attributes
+- NPC Impression

@@ -10,6 +10,7 @@ import {
   type RelationshipNode,
   type RelationshipLink,
 } from "@/data/placeholder";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 // Dynamic import — react-force-graph-2d uses canvas and must be client-only
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
@@ -108,16 +109,7 @@ function NodePopup({
             </div>
             <span className="stat-value text-[0.65rem]">{node.disposition}</span>
           </div>
-          <div className="progress-bar-bg">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${((node.disposition + 100) / 200) * 100}%`,
-                background: dispositionColor(node.disposition),
-                boxShadow: `0 0 6px ${dispositionColor(node.disposition)}44`,
-              }}
-            />
-          </div>
+          <ProgressBar value={((node.disposition + 100) / 200) * 100} color={dispositionColor(node.disposition)} glowColor={`${dispositionColor(node.disposition)}44`} />
         </div>
       )}
 

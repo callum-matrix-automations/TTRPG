@@ -11,6 +11,8 @@ import {
 } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
 import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 const dispositionColor = (d: number) => {
   const hue = ((d + 100) / 200) * 120;
@@ -74,9 +76,7 @@ function ActiveNpcDetail({ npc }: { npc: ActiveNpc }) {
             <span className="stat-value text-xs">{npc.disposition}</span>
           </div>
         </div>
-        <div className="progress-bar-bg">
-          <div className="progress-bar-fill" style={{ width: `${((npc.disposition + 100) / 200) * 100}%`, background: `hsl(${hue}, 70%, 50%)`, boxShadow: `0 0 6px hsla(${hue}, 70%, 50%, 0.4)` }} />
-        </div>
+        <ProgressBar value={((npc.disposition + 100) / 200) * 100} color={`hsl(${hue}, 70%, 50%)`} glowColor={`hsla(${hue}, 70%, 50%, 0.4)`} />
       </div>
 
       {/* HP */}
@@ -88,58 +88,41 @@ function ActiveNpcDetail({ npc }: { npc: ActiveNpc }) {
           </div>
           <span className="stat-value text-xs">{npc.hp.current}/{npc.hp.max}</span>
         </div>
-        <div className="progress-bar-bg">
-          <div
-            className="progress-bar-fill"
-            style={{
-              width: `${(npc.hp.current / npc.hp.max) * 100}%`,
-              background: npc.hp.current / npc.hp.max > 0.5 ? "var(--color-success)" : npc.hp.current / npc.hp.max > 0.25 ? "var(--color-gold)" : "var(--color-danger)",
-              boxShadow: `0 0 6px ${npc.hp.current / npc.hp.max > 0.5 ? "rgba(34,197,94,0.4)" : npc.hp.current / npc.hp.max > 0.25 ? "rgba(218,165,32,0.4)" : "rgba(239,68,68,0.4)"}`,
-            }}
-          />
-        </div>
+        <ProgressBar
+          value={(npc.hp.current / npc.hp.max) * 100}
+          color={npc.hp.current / npc.hp.max > 0.5 ? "var(--color-success)" : npc.hp.current / npc.hp.max > 0.25 ? "var(--color-gold)" : "var(--color-danger)"}
+          glowColor={npc.hp.current / npc.hp.max > 0.5 ? "rgba(34,197,94,0.4)" : npc.hp.current / npc.hp.max > 0.25 ? "rgba(218,165,32,0.4)" : "rgba(239,68,68,0.4)"}
+        />
       </div>
 
       {/* Attributes */}
       <div>
         <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Attributes</span>
-        <div className="grid grid-cols-6 gap-1 mt-1.5">
+        <div className="grid grid-cols-3 gap-1 mt-1.5">
           {Object.entries(npc.stats).map(([key, val]) => (
-            <div
-              key={key}
-              className="flex flex-col items-center py-1 rounded"
-              style={{ background: "var(--color-bg-deep)" }}
-            >
-              <span className="text-[0.5rem] text-[var(--color-text-muted)] uppercase">{key}</span>
-              <span className="stat-value text-xs">{val.score}</span>
-              <span className="text-[0.5rem]" style={{ color: "var(--color-gold-dim)" }}>
-                {val.mod >= 0 ? `+${val.mod}` : val.mod}
-              </span>
-            </div>
+            <KpiCard key={key} label={key} value={val.score} delta={val.mod >= 0 ? `+${val.mod}` : `${val.mod}`} trend={val.mod > 0 ? "up" : val.mod < 0 ? "down" : "flat"} tone="gold" size="sm" compact />
           ))}
         </div>
       </div>
 
       {/* Threat Impression */}
-      <div className="card" style={{ borderLeft: "3px solid var(--color-gold)" }}>
-        <div className="flex items-center gap-1.5 mb-1">
-          <AlertTriangle size={11} style={{ color: "var(--color-gold)" }} />
-          <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Impression</span>
-        </div>
-        <p className="text-[0.65rem] text-[var(--color-text-secondary)] italic">{npc.threatImpression}</p>
-      </div>
+      <KpiCard
+        label="Impression"
+        value={npc.threatImpression}
+        tone="warning"
+        size="sm"
+        icon={<AlertTriangle size={12} />}
+      />
 
       {/* Observed Capabilities */}
       {npc.observedCapabilities.length > 0 && (
         <div>
           <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Observed</span>
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <ChipRow className="mt-1.5">
             {npc.observedCapabilities.map((cap) => (
-              <span key={cap} className="badge" style={{ background: "var(--color-bg-deep)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
-                {cap}
-              </span>
+              <AvatarChip key={cap} label={cap} variant="default" size="xs" icon={<Eye size={9} />} />
             ))}
-          </div>
+          </ChipRow>
         </div>
       )}
 
@@ -147,26 +130,22 @@ function ActiveNpcDetail({ npc }: { npc: ActiveNpc }) {
       {npc.visibleStatus.length > 0 && (
         <div>
           <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Status</span>
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <ChipRow className="mt-1.5">
             {npc.visibleStatus.map((s) => (
-              <span key={s} className="badge" style={{ background: "rgba(218,165,32,0.12)", color: "var(--color-gold)", border: "1px solid var(--color-gold-dim)" }}>
-                {s}
-              </span>
+              <AvatarChip key={s} label={s} variant="warning" size="xs" />
             ))}
-          </div>
+          </ChipRow>
         </div>
       )}
 
       {/* Traits */}
       <div>
         <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Traits</span>
-        <div className="flex flex-wrap gap-1.5 mt-1.5">
+        <ChipRow className="mt-1.5">
           {npc.traits.map((trait) => (
-            <span key={trait} className="badge" style={{ background: "var(--color-bg-elevated)", color: "var(--color-purple-light)", border: "1px solid var(--color-border)" }}>
-              {trait}
-            </span>
+            <AvatarChip key={trait} label={trait} variant="purple" size="xs" />
           ))}
-        </div>
+        </ChipRow>
       </div>
 
       {/* Appearance */}
@@ -222,21 +201,17 @@ function PassiveNpcDetail({ npc }: { npc: PassiveNpc }) {
             <span className="stat-value text-xs">{npc.disposition}</span>
           </div>
         </div>
-        <div className="progress-bar-bg">
-          <div className="progress-bar-fill" style={{ width: `${((npc.disposition + 100) / 200) * 100}%`, background: `hsl(${hue}, 70%, 50%)`, boxShadow: `0 0 6px hsla(${hue}, 70%, 50%, 0.4)` }} />
-        </div>
+        <ProgressBar value={((npc.disposition + 100) / 200) * 100} color={`hsl(${hue}, 70%, 50%)`} glowColor={`hsla(${hue}, 70%, 50%, 0.4)`} />
       </div>
 
       {/* Traits */}
       <div>
         <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Traits</span>
-        <div className="flex flex-wrap gap-1.5 mt-1.5">
+        <ChipRow className="mt-1.5">
           {npc.traits.map((trait) => (
-            <span key={trait} className="badge" style={{ background: "var(--color-bg-elevated)", color: "var(--color-purple-light)", border: "1px solid var(--color-border)" }}>
-              {trait}
-            </span>
+            <AvatarChip key={trait} label={trait} variant="purple" size="xs" />
           ))}
-        </div>
+        </ChipRow>
       </div>
 
       {/* Appearance */}
@@ -281,11 +256,11 @@ function BackgroundSection({ npcs }: { npcs: BackgroundNpc[] }) {
           {npcs.map((npc) => (
             <div
               key={npc.id}
-              className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md"
+              className="group flex items-start gap-2.5 px-2.5 py-1.5 rounded-md transition-all duration-200"
               style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
             >
               <div
-                className="w-6 h-6 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+                className="w-6 h-6 rounded-full overflow-hidden shrink-0 flex items-center justify-center mt-0.5"
                 style={{ background: "var(--color-bg-deep)", border: "1px solid var(--color-border)" }}
               >
                 {npc.portrait ? (
@@ -296,7 +271,7 @@ function BackgroundSection({ npcs }: { npcs: BackgroundNpc[] }) {
               </div>
               <div className="flex-1 min-w-0">
                 <span className="text-[0.65rem] text-[var(--color-text-secondary)]">{npc.name}</span>
-                <p className="text-[0.55rem] text-[var(--color-text-muted)] truncate">{npc.description}</p>
+                <p className="text-[0.55rem] text-[var(--color-text-muted)] truncate group-hover:whitespace-normal group-hover:overflow-visible transition-all duration-200">{npc.description}</p>
               </div>
             </div>
           ))}

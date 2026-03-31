@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { type Quest } from "@/data/placeholder";
 import { GlassHighlight } from "@/components/ui/glass";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 const statusConfig: Record<string, { color: string; label: string; bg: string }> = {
   active: { color: "var(--color-gold)", label: "Active", bg: "var(--color-gold-subtle)" },
@@ -130,9 +131,7 @@ export default function QuestModal({
 
             {/* Objectives */}
             <GlassHighlight title={`Objectives (${completedCount}/${quest.objectives.length})`} accentColor={status.color}>
-              <div className="progress-bar-bg mb-2">
-                <div className="progress-bar-fill" style={{ width: `${(completedCount / quest.objectives.length) * 100}%`, background: status.color, boxShadow: `0 0 6px ${status.color}44` }} />
-              </div>
+              <ProgressBar value={(completedCount / quest.objectives.length) * 100} color={status.color} glowColor={`${status.color}44`} className="mb-2" />
               <div className="space-y-1">
                 {quest.objectives.map((obj, i) => (
                   <div key={i} className="flex items-start gap-2 text-[0.6rem]">

@@ -4,6 +4,9 @@ import { Shield, Star, AlertTriangle, Dna } from "lucide-react";
 import { transformation, playerCharacter } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
 import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { ProgressCircle } from "@/components/ui/progress-circle";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 export default function TransformationPanel() {
   const t = transformation;
@@ -46,27 +49,16 @@ export default function TransformationPanel() {
       </div>
       <div className="panel-content space-y-4">
         {/* Faction & Status */}
-        <div
-          className="card"
-          style={{ borderLeft: `3px solid ${t.factionColor}` }}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: t.factionColor ?? "var(--color-gold)" }} />
-            <span className="text-xs font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-pink-light)" }}>
-              {t.factionName}
-            </span>
-          </div>
-          <span className="text-[0.65rem] text-[var(--color-text-muted)]">
-            Stage {t.currentThreshold}: {t.thresholdName}
-          </span>
-          {t.assignedTemplate && (
-            <div className="mt-1">
-              <span className="badge" style={{ background: `${t.factionColor}22`, color: t.factionColor ?? "var(--color-gold)" }}>
-                Template: {t.assignedTemplate}
-              </span>
-            </div>
-          )}
-        </div>
+        <KpiCard
+          label={t.factionName ?? "Unknown Faction"}
+          value={`Stage ${t.currentThreshold}`}
+          delta={`${t.overallProgress}%`}
+          trend={t.overallProgress > 50 ? "down" : t.overallProgress > 0 ? "flat" : "up"}
+          caption={t.thresholdName}
+          tone="warning"
+          size="md"
+          icon={t.assignedTemplate ? <Dna size={14} /> : undefined}
+        />
 
         {/* Core Metrics */}
         <div className="space-y-3">
@@ -79,9 +71,7 @@ export default function TransformationPanel() {
               </div>
               <span className="stat-value text-xs">{t.identity}/100</span>
             </div>
-            <div className="progress-bar-bg" style={{ height: "8px" }}>
-              <div className="progress-bar-fill" style={{ width: `${t.identity}%`, background: identityColor, boxShadow: `0 0 6px ${identityColor}44` }} />
-            </div>
+            <ProgressBar value={t.identity} color={identityColor} glowColor={`${identityColor}44`} height={8} />
             <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-0.5">
               {t.identity > 75 ? "Your sense of self is intact." : t.identity > 50 ? "Something feels different. You're not sure what." : t.identity > 25 ? "Who were you before? The memories are getting fuzzy." : "You can barely remember your old life."}
             </p>
@@ -96,9 +86,7 @@ export default function TransformationPanel() {
               </div>
               <span className="stat-value text-xs">{t.willpower}/100</span>
             </div>
-            <div className="progress-bar-bg" style={{ height: "8px" }}>
-              <div className="progress-bar-fill" style={{ width: `${t.willpower}%`, background: willpowerColor, boxShadow: `0 0 6px ${willpowerColor}44` }} />
-            </div>
+            <ProgressBar value={t.willpower} color={willpowerColor} glowColor={`${willpowerColor}44`} height={8} />
             <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-0.5">
               Mental defense modifier: {t.willpower > 75 ? "+5" : t.willpower > 50 ? "+3" : t.willpower > 25 ? "+0" : t.willpower > 0 ? "-3" : "-5"}
             </p>
@@ -113,9 +101,7 @@ export default function TransformationPanel() {
               </div>
               <span className="stat-value text-xs">{t.conditioning}/100</span>
             </div>
-            <div className="progress-bar-bg" style={{ height: "8px" }}>
-              <div className="progress-bar-fill" style={{ width: `${t.conditioning}%`, background: conditioningColor, boxShadow: t.conditioning > 50 ? `0 0 6px rgba(239,68,68,0.4)` : "none" }} />
-            </div>
+            <ProgressBar value={t.conditioning} color={conditioningColor} glowColor={t.conditioning > 50 ? "rgba(239,68,68,0.4)" : undefined} height={8} />
             <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-0.5">
               {t.conditioning < 10 ? "Minimal exposure." : t.conditioning < 25 ? "You've been exposed to something." : t.conditioning < 50 ? "Their influence is taking hold." : t.conditioning < 75 ? "Resistance is becoming difficult." : "Their programming is nearly complete."}
             </p>
@@ -155,23 +141,20 @@ export default function TransformationPanel() {
           />
         </div>
 
-        {/* Overall Progress */}
-        <div
-          className="rounded-lg p-3 text-center"
-          style={{ background: "var(--color-bg-deep)", border: "1px solid var(--color-border)" }}
-        >
-          <span className="text-[0.65rem] text-[var(--color-text-muted)]">Overall Transformation</span>
-          <div className="progress-bar-bg mt-1.5" style={{ height: "10px" }}>
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${t.overallProgress}%`,
-                background: `linear-gradient(90deg, var(--color-purple), ${t.factionColor ?? "var(--color-danger)"})`,
-                boxShadow: `0 0 8px ${t.factionColor}44`,
-              }}
-            />
-          </div>
-          <span className="stat-value text-sm mt-1 block">{t.overallProgress}%</span>
+        {/* Overall Progress — Circle */}
+        <div className="flex flex-col items-center gap-2">
+          <ProgressCircle
+            value={t.overallProgress}
+            size={90}
+            strokeWidth={7}
+            color={t.factionColor ?? "var(--color-danger)"}
+            trackColor="var(--color-bg-elevated)"
+          >
+            <span className="stat-value text-lg" style={{ color: t.factionColor ?? "var(--color-gold)" }}>
+              {t.overallProgress}%
+            </span>
+          </ProgressCircle>
+          <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>Overall Transformation</span>
         </div>
       </div>
     </div>

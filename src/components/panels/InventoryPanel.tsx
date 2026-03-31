@@ -1,91 +1,86 @@
 "use client";
 
 import { useState } from "react";
-import { Backpack, Sword, ShieldCheck, Sparkles, FlaskConical, Wrench, Box } from "lucide-react";
+import { motion } from "framer-motion";
+import { Backpack, Eye } from "lucide-react";
 import { inventory } from "@/data/placeholder";
 import ItemModal from "@/components/modals/ItemModal";
 
-const rarityColors: Record<string, string> = {
-  common: "var(--color-text-secondary)",
-  uncommon: "#22c55e",
-  rare: "#60a5fa",
-  "very rare": "#a78bfa",
-  legendary: "#daa520",
-};
-
-const typeIcons: Record<string, React.ReactNode> = {
-  weapon: <Sword size={12} />,
-  armor: <ShieldCheck size={12} />,
-  wondrous: <Sparkles size={12} />,
-  consumable: <FlaskConical size={12} />,
-  tool: <Wrench size={12} />,
-  gear: <Box size={12} />,
-};
-
 type Item = (typeof inventory)[number];
+
+const rarityColors: Record<string, { text: string; bg: string; border: string }> = {
+  common: { text: "var(--color-text-secondary)", bg: "var(--color-bg-elevated)", border: "var(--color-border)" },
+  uncommon: { text: "#22c55e", bg: "rgba(34,197,94,0.08)", border: "#22c55e33" },
+  rare: { text: "#60a5fa", bg: "rgba(96,165,250,0.08)", border: "#60a5fa33" },
+  "very rare": { text: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "#a78bfa33" },
+  legendary: { text: "#daa520", bg: "rgba(218,165,32,0.08)", border: "#daa52033" },
+};
+
+function InventoryCard({ item, onSelect }: { item: Item; onSelect: () => void }) {
+  const rarity = rarityColors[item.rarity] ?? rarityColors.common;
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, transition: { duration: 0.15 } }}
+      className="flex items-center justify-between w-full p-3 rounded-xl cursor-pointer transition-shadow hover:shadow-md"
+      style={{ background: "var(--color-bg-elevated)", border: `1px solid ${rarity.border}` }}
+      onClick={onSelect}
+    >
+      {/* Left: Image + Name/Type */}
+      <div className="flex items-center gap-3 min-w-0">
+        <img
+          src={item.image}
+          alt={item.name}
+          className="h-10 w-10 rounded-lg object-cover shrink-0"
+          style={{ border: `1px solid ${rarity.border}` }}
+        />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold truncate" style={{ color: rarity.text }}>{item.name}</p>
+          <p className="text-[0.6rem] capitalize truncate" style={{ color: "var(--color-text-muted)" }}>{item.type}</p>
+        </div>
+      </div>
+
+      {/* Right: Badges + View */}
+      <div className="flex items-center gap-2.5 shrink-0 ml-3">
+        <div className="text-right">
+          {item.equipped && (
+            <span className="text-[0.55rem] font-semibold block" style={{ color: "var(--color-gold)" }}>Equipped</span>
+          )}
+          {item.quantity > 1 && (
+            <span className="text-[0.55rem] font-medium block" style={{ color: "var(--color-text-muted)" }}>×{item.quantity}</span>
+          )}
+          {!item.equipped && item.quantity <= 1 && (
+            <span
+              className="text-[0.55rem] font-medium capitalize"
+              style={{ color: rarity.text }}
+            >
+              {item.rarity}
+            </span>
+          )}
+        </div>
+        <button
+          className="h-7 px-2.5 rounded-lg text-[0.6rem] font-semibold flex items-center gap-1 cursor-pointer transition-all duration-150"
+          style={{ background: rarity.bg, color: rarity.text, border: `1px solid ${rarity.border}` }}
+          onClick={(e) => { e.stopPropagation(); onSelect(); }}
+        >
+          <Eye size={11} /> View
+        </button>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function InventoryPanel() {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="panel-header">
-        <Backpack size={14} className="text-[var(--color-gold)]" />
-        Inventory
-        <span
-          className="ml-auto badge"
-          style={{
-            background: "var(--color-gold-subtle)",
-            color: "var(--color-gold-light)",
-          }}
-        >
-          {inventory.length}
-        </span>
-      </div>
-      <div className="panel-content space-y-1.5">
-        {inventory.map((item) => (
-          <div
-            key={item.id}
-            className="card flex items-start gap-2 cursor-pointer"
-            onClick={() => setSelectedItem(item)}
-          >
-            <div
-              className="mt-0.5 flex-shrink-0"
-              style={{ color: rarityColors[item.rarity] }}
-            >
-              {typeIcons[item.type] || <Box size={12} />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-xs font-medium truncate"
-                  style={{ color: rarityColors[item.rarity] }}
-                >
-                  {item.name}
-                </span>
-                {item.equipped && (
-                  <span
-                    className="badge"
-                    style={{
-                      background: "var(--color-gold-subtle)",
-                      color: "var(--color-gold)",
-                    }}
-                  >
-                    E
-                  </span>
-                )}
-                {item.quantity > 1 && (
-                  <span className="stat-value text-[0.6rem]">
-                    x{item.quantity}
-                  </span>
-                )}
-              </div>
-              <p className="text-[0.6rem] text-[var(--color-text-muted)] truncate">
-                {item.description}
-              </p>
-            </div>
-          </div>
-        ))}
+      <div className="panel-content">
+        <div className="flex flex-col gap-2">
+          {inventory.map((item) => (
+            <InventoryCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
+          ))}
+        </div>
       </div>
 
       {selectedItem && (

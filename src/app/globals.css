@@ -238,6 +238,17 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 8px var(--color-gold-glow);
 }
 
+/* ── Accordion Animations ── */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
 /* ── Narrative Streaming Cursor ── */
 @keyframes blink {
   0%, 50% { opacity: 1; }

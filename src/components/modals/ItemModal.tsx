@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Sparkles, Info, Zap, Tags } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Sparkles, Zap, Backpack, Trash2, Package } from "lucide-react";
 import { inventory } from "@/data/placeholder";
 
 type Item = (typeof inventory)[number];
 
-const rarityColors: Record<string, { text: string; border: string; glow: string }> = {
-  common: { text: "var(--color-text-secondary)", border: "var(--color-border)", glow: "transparent" },
-  uncommon: { text: "#22c55e", border: "#22c55e88", glow: "rgba(34,197,94,0.15)" },
-  rare: { text: "#60a5fa", border: "#60a5fa88", glow: "rgba(96,165,250,0.15)" },
-  "very rare": { text: "#a78bfa", border: "#a78bfa88", glow: "rgba(167,139,250,0.15)" },
-  legendary: { text: "#daa520", border: "#daa52088", glow: "rgba(218,165,32,0.2)" },
+const rarityColors: Record<string, { text: string; bg: string; border: string }> = {
+  common: { text: "var(--color-text-secondary)", bg: "var(--color-bg-elevated)", border: "var(--color-border)" },
+  uncommon: { text: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "#22c55e44" },
+  rare: { text: "#60a5fa", bg: "rgba(96,165,250,0.1)", border: "#60a5fa44" },
+  "very rare": { text: "#a78bfa", bg: "rgba(167,139,250,0.1)", border: "#a78bfa44" },
+  legendary: { text: "#daa520", bg: "rgba(218,165,32,0.1)", border: "#daa52044" },
 };
 
 export default function ItemModal({
@@ -26,30 +27,13 @@ export default function ItemModal({
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
 
-  // Trigger enter animation on mount
+  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
+  const handleClose = useCallback(() => { setClosing(true); setTimeout(onClose, 200); }, [onClose]);
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
-  }, []);
-
-  // Animated close
-  const handleClose = useCallback(() => {
-    setClosing(true);
-    setTimeout(onClose, 200);
-  }, [onClose]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [handleClose]);
-
-  // Close on backdrop click
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === backdropRef.current) handleClose();
-  };
 
   const isOpen = visible && !closing;
 
@@ -62,161 +46,163 @@ export default function ItemModal({
         backdropFilter: isOpen ? "blur(4px)" : "blur(0px)",
         transition: "background 200ms ease, backdrop-filter 200ms ease",
       }}
-      onClick={handleBackdropClick}
+      onClick={(e) => { if (e.target === backdropRef.current) handleClose(); }}
     >
       <div
-        className="relative w-full max-w-md mx-4 rounded-xl overflow-hidden"
+        className="relative w-full max-w-sm mx-4 overflow-hidden rounded-xl group"
         style={{
-          background: "linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-bg-base) 100%)",
+          background: "var(--color-bg-base)",
           border: `1px solid ${rarity.border}`,
-          boxShadow: `0 24px 48px rgba(0,0,0,0.6), 0 0 30px ${rarity.glow}`,
+          boxShadow: `0 24px 48px rgba(0,0,0,0.5), 0 0 20px ${rarity.bg}`,
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
           transition: "opacity 200ms ease, transform 200ms ease",
         }}
       >
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-150"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text-secondary)",
-          }}
-          aria-label="Close"
-        >
-          <X size={16} />
-        </button>
+        {/* ── Image ── */}
+        <div className="relative overflow-hidden" style={{ aspectRatio: "4/3" }}>
+          <motion.img
+            src={item.image}
+            alt={item.name}
+            className="w-full h-full object-cover"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          />
 
-        {/* Content */}
-        <div className="px-5 pt-5 pb-5">
-          {/* Header: Image + Name/Badges */}
-          <div className="flex gap-4 mb-4">
-            {/* Item Icon Image */}
-            <div
-              className="shrink-0 w-20 h-28 rounded-lg overflow-hidden"
-              style={{
-                border: `1px solid ${rarity.border}`,
-                boxShadow: `0 0 12px ${rarity.glow}`,
-              }}
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Name, Type, Badges */}
-            <div className="flex-1 min-w-0 pt-1">
-              <h2
-                className="text-lg font-bold mb-0.5 leading-tight"
-                style={{ fontFamily: "var(--font-heading)", color: rarity.text }}
+          {/* Badges — top left */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {item.rarity !== "common" && (
+              <span
+                className="text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full capitalize"
+                style={{ background: rarity.bg, color: rarity.text, backdropFilter: "blur(8px)" }}
               >
-                {item.name}
-              </h2>
-              <p className="text-[0.7rem] text-[var(--color-text-muted)] capitalize mb-2">
-                {item.type}
-                {item.quantity > 1 && (
-                  <span className="stat-value ml-2">×{item.quantity}</span>
-                )}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                <span
-                  className="text-[0.6rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
-                  style={{
-                    background: rarity.glow,
-                    color: rarity.text,
-                    border: `1px solid ${rarity.border}`,
-                  }}
-                >
-                  {item.rarity}
+                {item.rarity}
+              </span>
+            )}
+            {item.equipped && (
+              <span className="text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "rgba(218,165,32,0.15)", color: "var(--color-gold)", backdropFilter: "blur(8px)" }}>
+                Equipped
+              </span>
+            )}
+            {item.quantity > 1 && (
+              <span className="text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.6)", color: "var(--color-text-primary)", backdropFilter: "blur(8px)" }}>
+                ×{item.quantity}
+              </span>
+            )}
+          </div>
+
+          {/* Close — top right */}
+          <button
+            onClick={handleClose}
+            className="absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center cursor-pointer"
+            style={{ background: "var(--color-bg-base)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        {/* ── Content ── */}
+        <div className="p-4 space-y-3">
+          {/* Name + type row */}
+          <div>
+            <h3 className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>{item.name}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs capitalize" style={{ color: rarity.text }}>{item.type}</span>
+              {item.slots.length > 0 && (
+                <span className="text-[0.6rem] ml-auto" style={{ color: "var(--color-text-muted)" }}>
+                  {item.slots.join(" · ")}
                 </span>
-                {item.equipped && (
-                  <span
-                    className="text-[0.6rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
-                    style={{
-                      background: "var(--color-gold-subtle)",
-                      color: "var(--color-gold)",
-                      border: "1px solid var(--color-gold-dim)",
-                    }}
-                  >
-                    Equipped
-                  </span>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
           {/* Description */}
-          <div className="mb-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Info size={12} className="text-[var(--color-text-muted)]" />
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Description
-              </span>
-            </div>
-            <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
-              {item.description}
-            </p>
-          </div>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+            {item.description}
+          </p>
 
           {/* Effects */}
           {item.effects.length > 0 && (
-            <div className="mb-3">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Zap size={12} style={{ color: rarity.text }} />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  Effects
-                </span>
-              </div>
-              <div className="space-y-1">
+            <div className="space-y-1.5">
+              <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>Effects</span>
+              <div className="flex flex-col gap-1.5">
                 {item.effects.map((effect, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-2 px-2.5 py-1.5 rounded-md text-xs"
-                    style={{
-                      background: "var(--color-bg-elevated)",
-                      border: "1px solid var(--color-border-subtle)",
-                    }}
+                    className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+                    style={{ background: rarity.bg, border: `1px solid ${rarity.border}` }}
                   >
-                    <Sparkles size={11} className="mt-0.5 shrink-0" style={{ color: rarity.text }} />
-                    <span className="text-[var(--color-text-primary)]">{effect}</span>
+                    <Sparkles size={12} className="mt-0.5 shrink-0" style={{ color: rarity.text }} />
+                    <span style={{ color: "var(--color-text-primary)" }}>{effect}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Attributes */}
+          {/* Attributes as inline tags */}
           {Object.keys(item.attributes).length > 0 && (
-            <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Tags size={12} className="text-[var(--color-text-muted)]" />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  Attributes
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
+            <div className="space-y-1.5">
+              <span className="text-[0.6rem]" style={{ color: "var(--color-text-muted)" }}>Details</span>
+              <div className="flex flex-wrap gap-2">
                 {Object.entries(item.attributes).map(([key, value]) => (
                   <div
                     key={key}
-                    className="flex items-center justify-between px-2.5 py-1.5 rounded-md"
-                    style={{
-                      background: "var(--color-bg-elevated)",
-                      border: "1px solid var(--color-border-subtle)",
-                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
+                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)" }}
                   >
-                    <span className="text-[0.6rem] capitalize text-[var(--color-text-muted)]">
-                      {key}
-                    </span>
-                    <span className="stat-value text-[0.65rem]">{value}</span>
+                    <span className="capitalize" style={{ color: "var(--color-text-muted)" }}>{key}</span>
+                    <span className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{value}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Footer Actions ── */}
+        <div className="p-4 pt-0 flex gap-2">
+          {/* Primary action */}
+          {item.type === "consumable" ? (
+            <button
+              className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150"
+              style={{ background: rarity.text, color: "var(--color-bg-deepest)" }}
+              onClick={() => console.log(`Use ${item.id}`)}
+            >
+              <Zap size={14} /> Use Item
+            </button>
+          ) : item.slots.length > 0 ? (
+            <button
+              className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150"
+              style={{
+                background: item.equipped ? "var(--color-bg-elevated)" : rarity.text,
+                color: item.equipped ? "var(--color-text-secondary)" : "var(--color-bg-deepest)",
+                border: item.equipped ? "1px solid var(--color-border)" : "none",
+              }}
+              onClick={() => console.log(`${item.equipped ? "Unequip" : "Equip"} ${item.id}`)}
+            >
+              <Backpack size={14} /> {item.equipped ? "Unequip" : "Equip"}
+            </button>
+          ) : (
+            <button
+              className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150"
+              style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}
+              onClick={() => console.log(`Inspect ${item.id}`)}
+            >
+              <Package size={14} /> Inspect
+            </button>
+          )}
+
+          {/* Drop button */}
+          <button
+            className="h-9 w-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150"
+            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "var(--color-danger)" }}
+            onClick={() => console.log(`Drop ${item.id}`)}
+            title="Drop item"
+          >
+            <Trash2 size={14} />
+          </button>
         </div>
       </div>
     </div>

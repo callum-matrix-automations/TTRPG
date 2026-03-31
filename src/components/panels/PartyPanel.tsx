@@ -5,6 +5,7 @@ import { Shield, Heart, HelpCircle, Star } from "lucide-react";
 import { companions, type CompanionNpc } from "@/data/placeholder";
 import CompanionModal from "@/components/modals/CompanionModal";
 import { HoverRevealCard, RevealRow, RevealBar } from "@/components/ui/hover-reveal-card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 function CompanionCard({ npc, onOpenModal }: { npc: CompanionNpc; onOpenModal: () => void }) {
   const hpPercent = (npc.hp.current / npc.hp.max) * 100;
@@ -34,9 +35,7 @@ function CompanionCard({ npc, onOpenModal }: { npc: CompanionNpc; onOpenModal: (
             <span className="text-[0.55rem] text-[var(--color-text-muted)]">Level {npc.level} {npc.race} {npc.class}</span>
             <div className="flex items-center gap-1.5 mt-1">
               <Heart size={9} style={{ color: hpColor }} />
-              <div className="progress-bar-bg flex-1" style={{ height: "3px" }}>
-                <div className="progress-bar-fill" style={{ width: `${hpPercent}%`, background: hpColor }} />
-              </div>
+              <ProgressBar value={hpPercent} color={hpColor} height={3} className="flex-1" />
               <span className="stat-value text-[0.5rem]">{npc.hp.current}/{npc.hp.max}</span>
             </div>
           </div>
