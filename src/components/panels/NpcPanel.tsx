@@ -9,6 +9,7 @@ import {
   type PassiveNpc,
   type BackgroundNpc,
 } from "@/data/placeholder";
+import AppearanceView from "@/components/shared/AppearanceView";
 
 const dispositionColor = (d: number) => {
   const hue = ((d + 100) / 200) * 120;
@@ -243,10 +244,8 @@ function ActiveNpcDetail({ npc }: { npc: ActiveNpc }) {
         <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
           <Eye size={11} className="inline mr-1" />Appearance
         </span>
-        <div className="space-y-1 mt-1.5 text-[0.7rem] text-[var(--color-text-secondary)]">
-          {Object.entries(npc.appearance).map(([key, val]) => (
-            <p key={key}><span className="text-[var(--color-pink-dim)] capitalize">{key}:</span> {val}</p>
-          ))}
+        <div className="mt-1.5">
+          <AppearanceView appearance={npc.detailedAppearance} transformation={npc.transformation} name={npc.name} portrait={npc.portrait} />
         </div>
       </div>
     </div>
@@ -315,10 +314,8 @@ function PassiveNpcDetail({ npc }: { npc: PassiveNpc }) {
         <span className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
           <Eye size={11} className="inline mr-1" />Appearance
         </span>
-        <div className="space-y-1 mt-1.5 text-[0.7rem] text-[var(--color-text-secondary)]">
-          {Object.entries(npc.appearance).map(([key, val]) => (
-            <p key={key}><span className="text-[var(--color-pink-dim)] capitalize">{key}:</span> {val}</p>
-          ))}
+        <div className="mt-1.5">
+          <AppearanceView appearance={npc.detailedAppearance} transformation={npc.transformation} name={npc.name} portrait={npc.portrait} />
         </div>
       </div>
     </div>

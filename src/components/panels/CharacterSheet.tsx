@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, ChevronDown, Info, Zap } from "lucide-react";
-import { playerCharacter } from "@/data/placeholder";
+import { playerCharacter, transformation } from "@/data/placeholder";
+import AppearanceView from "@/components/shared/AppearanceView";
 
 // ── Collapsible Drawer ──
 function Drawer({
@@ -450,14 +451,8 @@ export default function CharacterSheet() {
         </Drawer>
 
         {/* Appearance */}
-        <Drawer title="Appearance">
-          <div className="space-y-1 text-[0.7rem] text-[var(--color-text-secondary)]">
-            {Object.entries(pc.appearance).map(([key, val]) => (
-              <p key={key}>
-                <span className="text-[var(--color-pink-dim)] capitalize">{key}:</span> {val}
-              </p>
-            ))}
-          </div>
+        <Drawer title="Appearance" defaultOpen>
+          <AppearanceView appearance={pc.appearance} transformation={transformation} name={pc.name} portrait="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" />
         </Drawer>
       </div>
     </div>

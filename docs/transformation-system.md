@@ -1,0 +1,305 @@
+# Transformation System — Generic Framework
+
+## Overview
+
+Transformation is the core mechanic that distinguishes this game from a standard RPG. Each faction (dungeon) has a transformation pipeline — a series of stages that progressively alter the player's physical appearance, mental state, and identity.
+
+The system is generic. Each faction fills it with faction-specific content, but the mechanical framework is the same everywhere. Only **one faction's transformation is active at a time** — the player is locked into a faction's influence zone once the intro transformation triggers, and must either succumb or defeat the faction to leave.
+
+Transformation is not a standalone mechanic — it's a combination of existing systems:
+- **Clocks** track progression
+- **Status effects** apply mental/physical changes
+- **Appearance tracking** records physical modifications
+- **The Resolution Engine** handles opposed rolls (NPC pressure vs player resistance)
+- **The Event Manager agent** generates threshold events dynamically
+
+---
+
+## Dungeon Flow
+
+Every faction follows this pattern:
+
+```
+1. Player enters faction territory freely (open world exploration)
+2. Player engages with the faction (quests, NPCs, services)
+3. INTRO TRANSFORMATION triggers (faction-specific entry event)
+   → Player is now LOCKED IN to this faction's territory
+   → Transformation tracker activates
+4. Player must navigate the faction while resisting transformation
+   → Identity depletes from failed rolls, exposure, time
+   → Willpower drops, making resistance harder
+   → Conditioning rises, changing behavior
+   → Physical changes accumulate
+5. RESOLUTION:
+   a. SUCCUMB — Identity hits 0, full transformation, class change
+      → Player continues with new identity, can encounter other factions later
+   b. DEFEAT — Player overcomes the faction (quest completion, key NPC defeated, escape)
+      → Player returns to open world, partially changed depending on how far they got
+```
+
+This is the **core game loop** — each faction is a dungeon with transformation as the threat instead of death.
+
+---
+
+## Core Metrics
+
+Three values tracked for the **currently active** faction transformation:
+
+### Identity (100 → 0)
+
+The player's sense of self. When it hits faction-defined milestones, threshold events trigger.
+
+**Depletes from:**
+- Failed opposed rolls against faction NPCs
+- Conditioning exposure (devices, treatments, environments)
+- Time spent in faction territory
+- Using faction products/services
+- Taking faction jobs
+- Faction-specific triggers (wearing their clothing, consuming their food/drink, etc.)
+
+**Threshold events fire at faction-defined milestones** (e.g., Casino fires at 80, 60, 40, 20, 0).
+
+### Willpower (100 → 0)
+
+Resistance modifier on mental defense rolls:
+
+| Willpower | Roll Modifier |
+|---|---|
+| 100-76 | +5 |
+| 75-51 | +3 |
+| 50-26 | +0 |
+| 25-1 | -3 |
+| 0 | -5 |
+
+Creates an intentional death spiral — harder to resist as willpower drops.
+
+**Depletes from:**
+- Failed mental defense rolls
+- Conditioning exposure
+- Exhaustion (low energy while in faction territory)
+
+**Partially restored by:**
+- Successful mental defense rolls (small boost)
+- Finding resistance items or allies within the faction
+- Story events (discovering the truth, finding evidence, etc.)
+
+### Conditioning (0 → 100)
+
+The faction's grip on the player. Unlike Identity and Willpower, conditioning does **not** decrease naturally.
+
+**Increases from:** all the same sources that deplete Identity.
+
+**Effects at thresholds:**
+- 25+: Speech patterns begin shifting
+- 50+: Preferences and reactions change (AI adjusts player behavior descriptions)
+- 75+: Voluntary resistance becomes very difficult
+- 100: Complete — player fully conditioned
+
+---
+
+## Physical Changes Tracking
+
+### Tracked Body Parts
+
+| Body Part | Examples of Change |
+|---|---|
+| **Gender** | Biological sex shift |
+| **Height** | Increase or decrease |
+| **Hair** | Color, length, style, texture |
+| **Face** | Bone structure, features, shape |
+| **Eyes** | Color, shape, expression |
+| **Lips** | Fullness, color, texture |
+| **Makeup** | Permanent cosmetic changes |
+| **Skin** | Tone, texture, quality |
+| **Chest** | Size, shape |
+| **Waist** | Circumference |
+| **Hips** | Width, shape |
+| **Ass** | Size, shape |
+| **Hands & Nails** | Size, nail length/color |
+| **Legs** | Length, shape, tone |
+| **Feet** | Size, arch |
+| **Voice** | Pitch, tone, quality |
+| **Posture** | How the character carries themselves |
+| **Speech** | Patterns, vocabulary, verbal tics |
+
+### Data Structure
+
+```typescript
+type PhysicalChange = {
+  bodyPart: string;
+  before: string;
+  current: string;
+  changePercent: number;    // 0-100
+  source: string;           // faction ID
+  stage: number;            // which threshold applied this
+};
+
+// Overall progress = average of all changePercent values
+```
+
+### How Changes Apply
+
+- Changes are applied by threshold events (generated by the Event Manager)
+- Each threshold specifies which body parts change and the target state
+- Changes are incremental — a body part might go from 0% → 30% at threshold 1, then 30% → 70% at threshold 3
+- The AI narrates each change with sensory detail — the system provides the mechanical data, the AI provides the narrative
+
+---
+
+## Threshold Events
+
+Thresholds fire when Identity drops below faction-defined milestones. The faction defines:
+- **What milestone triggers it** (Identity < 80, < 60, etc.)
+- **What the outcome should be** (description for the Event Manager)
+- **Which body parts change**
+- **Whether this is the lock-in point**
+- **Whether this is reversible** (early stages may be, later stages aren't)
+
+The **Event Manager agent** generates the actual scene dynamically based on context — the threshold definition just says what should happen, not the specific narrative.
+
+### Data Structure
+
+```typescript
+type TransformationThreshold = {
+  stage: number;
+  name: string;
+  identityTrigger: number;         // fires when identity drops below this
+  outcome: string;                 // what happens (for Event Manager)
+  bodyPartsAffected: string[];     // which body parts change
+  conditioningIncrease: number;    // how much conditioning jumps
+  willpowerDrain: number;          // how much willpower drops
+  reversible: boolean;
+  isLockIn: boolean;               // does this lock the player into the faction?
+};
+```
+
+---
+
+## Faction Transformation Pipeline
+
+Each faction defines its complete pipeline:
+
+```typescript
+type FactionTransformationPipeline = {
+  factionId: string;
+  factionName: string;
+  currency: string | null;
+
+  // What triggers the intro lock-in
+  introEvent: string;              // description of what locks the player in
+
+  // Threshold stages
+  thresholds: TransformationThreshold[];
+
+  // Available templates/models
+  templates: {
+    id: string;
+    name: string;
+    code: string;                   // product line identifier
+    color: string;
+    role: string;
+    appearance: Record<string, string>;
+    personality: string;
+    speechPattern: string;
+    manufacturer: string;           // "BimTech", "Competitor", etc.
+  }[];
+
+  // Conditioning sources
+  conditioningSources: {
+    name: string;
+    identityDrain: number;
+    conditioningGain: number;
+    willpowerDrain: number;
+  }[];
+};
+```
+
+---
+
+## Casino Royale — Implementation
+
+### Pipeline
+
+| Stage | Name | Trigger | Outcome | Lock-in? |
+|---|---|---|---|---|
+| 0 | Guest | — | Player is a guest. Free to leave. No transformation active. | No |
+| — | Intro: Resident | Event | Player becomes a resident (debt, job, circumstance). **Locked in.** | **Yes** |
+| 1 | Initial Imprint | Identity < 80 | Prospective Staff. Employee ID issued. Subtle physical changes begin. | — |
+| 2 | Template Assignment | Identity < 60 | Assigned a specific model template. Changes accelerate toward template. | — |
+| 3 | Face Replacement | Identity < 40 | Face reconstructed. Unrecognizable as former self. | — |
+| 4 | Persona Imprinting | Identity < 20 | Mental overwrite. New name assigned. Old personality fragments. | — |
+| 5 | Final Conversion | Identity = 0 | Complete. Old identity dead. Player is now an Active Model. | — |
+
+### Templates
+
+**BimTech Custom (Casino-Exclusive):**
+- Candy Lush (P-Series, Pink) — Socialite hostess
+- Trixie Frost (T-Series, Blue) — VIP lounge
+- Ruby Blaze (R-Series, Red) — Obedience lounge
+- Dolly Gloss (D-Series, Silver) — Card dealer
+- Velvet Glow (V-Series, Gold) — Stage performer
+- Amethyst Aura (A-Series, Purple) — Divination
+- Angel Clean (AC-Series, White) — Cleaning maid
+- Carmen Caliente (CC-Series, Orange) — Floor hostess
+
+**Competitor Model (Casino Deal):**
+- Sakura Silk (S-Series, Black) — VIP companion
+
+### Currency
+Credits (internal, non-transferable)
+
+### Conditioning Sources
+- Alignment Sessions (Wellness Center)
+- Perfume exposure (NPC-initiated opposed roll)
+- Uniform wearing (passive drain)
+- Spa treatments (player-initiated)
+- Employment shifts
+- Neural headset sessions (forced after certain thresholds)
+
+---
+
+## Post-Transformation Continuity
+
+Full transformation is **not game over**. The player:
+- Gets a class change to the assigned template
+- Stats are modified per template
+- Appearance is set to template standard
+- Speech patterns change
+- Becomes a member of the faction
+- Retains player agency with new identity
+- Can encounter other factions later (locked into one at a time)
+- Can potentially be transformed again by a different faction
+
+"Defeat" resolution (escaping the faction):
+- Player returns to open world
+- Physical changes from early stages may persist partially
+- Willpower and Identity restore over time
+- Conditioning does NOT fully reset — lingering effects remain
+- The faction remembers the player and may pursue them
+
+---
+
+## UI Surfaces
+
+### Character Sheet — Transformation Tracker (New Drawer)
+
+Only visible when a transformation is active. Shows:
+- Faction name and color
+- Identity bar (100 → 0, depleting = bad)
+- Willpower bar (100 → 0, depleting = bad)
+- Conditioning bar (0 → 100, filling = bad)
+- Current threshold stage name
+- Overall physical change percentage
+
+### Character Sheet — Appearance Section (Enhanced)
+
+The existing appearance drawer becomes dynamic:
+- Shows current state of each tracked body part
+- Changed body parts highlighted with source faction color
+- Change percentage per body part
+- Original state shown muted for comparison
+- Overall transformation percentage displayed
+
+### Top Bar — Faction Currency
+
+Context-dependent: show faction currency when in faction territory, regular money when outside.

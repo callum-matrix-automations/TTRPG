@@ -226,26 +226,18 @@ export default function TopBar() {
       {/* Right — Resources */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <Coins size={13} className="text-[var(--color-gold)]" />
-          <span className="stat-value text-sm">{resources.gold}</span>
-          <span className="text-[0.6rem] text-[var(--color-text-muted)]">
-            gp
-          </span>
+          <Coins size={13} className="text-[var(--color-success)]" />
+          <span className="stat-value text-sm">${resources.cash}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <CircleDot size={11} className="text-[var(--color-text-secondary)]" />
-          <span className="stat-value text-xs">{resources.silver}</span>
-          <span className="text-[0.6rem] text-[var(--color-text-muted)]">
-            sp
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <CircleDot size={11} className="text-[var(--color-gold-dim)]" />
-          <span className="stat-value text-xs">{resources.copper}</span>
-          <span className="text-[0.6rem] text-[var(--color-text-muted)]">
-            cp
-          </span>
-        </div>
+        {resources.credits > 0 && (
+          <div className="flex items-center gap-1.5">
+            <CircleDot size={11} className="text-[var(--color-gold)]" />
+            <span className="stat-value text-xs">{resources.credits}</span>
+            <span className="text-[0.6rem] text-[var(--color-text-muted)]">
+              credits
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   Shield,
   Map,
   Home,
+  Dna,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
@@ -31,13 +32,15 @@ import QuestLog from "@/components/panels/QuestLog";
 import FactionReputation from "@/components/panels/FactionReputation";
 import WorldMap from "@/components/panels/WorldMap";
 import PropertyPanel from "@/components/panels/PropertyPanel";
+import TransformationPanel from "@/components/panels/TransformationPanel";
 import { ToastTriggerPanel } from "@/components/shared/ToastSystem";
 
-type LeftTab = "character" | "party" | "inventory" | "gear" | "relationships" | "map" | "property";
+type LeftTab = "character" | "transformation" | "party" | "inventory" | "gear" | "relationships" | "map" | "property";
 type RightTab = "npc" | "quests" | "factions";
 
 const leftTabs: { id: LeftTab; icon: typeof User; label: string }[] = [
   { id: "character", icon: User, label: "Character" },
+  { id: "transformation", icon: Dna, label: "Transformation" },
   { id: "party", icon: Shield, label: "Party" },
   { id: "inventory", icon: Backpack, label: "Inventory" },
   { id: "gear", icon: Swords, label: "Equipment" },
@@ -216,6 +219,7 @@ export default function GameLayout() {
   const renderLeftContent = () => {
     switch (leftTab) {
       case "character": return <CharacterSheet />;
+      case "transformation": return <TransformationPanel />;
       case "party": return <PartyPanel />;
       case "inventory": return <InventoryPanel />;
       case "gear": return <GearPanel />;
