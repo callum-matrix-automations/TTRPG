@@ -13,14 +13,12 @@ import {
   Map,
   Home,
   Dna,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
   GripVertical,
+  X,
 } from "lucide-react";
 
 import TopBar from "./TopBar";
+import GameSidebar from "./GameSidebar";
 import CharacterSheet from "@/components/panels/CharacterSheet";
 import PartyPanel from "@/components/panels/PartyPanel";
 import InventoryPanel from "@/components/panels/InventoryPanel";
@@ -38,22 +36,32 @@ import { ToastTriggerPanel } from "@/components/shared/ToastSystem";
 type LeftTab = "character" | "transformation" | "party" | "inventory" | "gear" | "relationships" | "map" | "property";
 type RightTab = "npc" | "quests" | "factions";
 
-const leftTabs: { id: LeftTab; icon: typeof User; label: string }[] = [
-  { id: "character", icon: User, label: "Character" },
-  { id: "transformation", icon: Dna, label: "Transformation" },
-  { id: "party", icon: Shield, label: "Party" },
-  { id: "inventory", icon: Backpack, label: "Inventory" },
-  { id: "gear", icon: Swords, label: "Equipment" },
-  { id: "map", icon: Map, label: "World Map" },
-  { id: "property", icon: Home, label: "Property" },
-  { id: "relationships", icon: Network, label: "Relationships" },
+const leftNavItems = [
+  { id: "character", name: "Character", icon: User, group: "player" },
+  { id: "transformation", name: "Transformation", icon: Dna, group: "player" },
+  { id: "party", name: "Party", icon: Shield, group: "player" },
+  { id: "inventory", name: "Inventory", icon: Backpack, group: "items" },
+  { id: "gear", name: "Equipment", icon: Swords, group: "items" },
+  { id: "map", name: "World Map", icon: Map, group: "world" },
+  { id: "property", name: "Property", icon: Home, group: "world" },
+  { id: "relationships", name: "Relationships", icon: Network, group: "world" },
 ];
 
-const rightTabs: { id: RightTab; icon: typeof Users; label: string }[] = [
-  { id: "npc", icon: Users, label: "NPCs" },
-  { id: "quests", icon: ScrollText, label: "Quests" },
-  { id: "factions", icon: Flag, label: "Factions" },
+const rightNavItems = [
+  { id: "npc", name: "NPCs", icon: Users, group: "scene" },
+  { id: "quests", name: "Quests", icon: ScrollText, group: "scene" },
+  { id: "factions", name: "Factions", icon: Flag, group: "scene" },
 ];
+
+const leftTabLabels: Record<string, string> = {
+  character: "Character", transformation: "Transformation", party: "Party",
+  inventory: "Inventory", gear: "Equipment", map: "World Map",
+  property: "Property", relationships: "Relationships",
+};
+
+const rightTabLabels: Record<string, string> = {
+  npc: "NPCs", quests: "Quests", factions: "Factions",
+};
 
 // ── Drag-to-resize hook ──
 function useDragResize(
@@ -111,22 +119,19 @@ function ResizeHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => v
   return (
     <div
       className="group flex items-center justify-center shrink-0 cursor-col-resize"
-      style={{
-        width: "12px",
-        background: "var(--color-bg-deepest)",
-      }}
+      style={{ width: "8px", background: "var(--color-bg-deepest)" }}
       onMouseDown={onMouseDown}
     >
       <div
-        className="flex flex-col items-center rounded transition-colors duration-150 group-hover:border-[var(--color-gold)]"
+        className="flex flex-col items-center rounded transition-colors duration-150"
         style={{
-          padding: "6px 2px",
+          padding: "6px 1px",
           background: "var(--color-bg-elevated)",
           border: "1px solid var(--color-border)",
         }}
       >
         <GripVertical
-          size={14}
+          size={12}
           className="transition-colors duration-150"
           style={{ color: "var(--color-text-muted)" }}
         />
@@ -135,86 +140,105 @@ function ResizeHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => v
   );
 }
 
-// ── Icon Strip ──
-function IconStrip({
-  tabs,
-  activeTab,
-  onTabClick,
-  collapsed,
-  onToggle,
-  side,
+// ── Panel Wrapper with close button ──
+function PanelWrapper({
+  title,
+  onClose,
+  width,
+  children,
 }: {
-  tabs: { id: string; icon: React.ComponentType<{ size?: number }>; label: string }[];
-  activeTab: string;
-  onTabClick: (id: string) => void;
-  collapsed: boolean;
-  onToggle: () => void;
-  side: "left" | "right";
+  title: string;
+  onClose: () => void;
+  width: number;
+  children: React.ReactNode;
 }) {
-  const CollapseIcon =
-    side === "left"
-      ? collapsed ? PanelLeftOpen : PanelLeftClose
-      : collapsed ? PanelRightOpen : PanelRightClose;
-
   return (
     <div
-      className="sidebar-icon-strip"
+      className="shrink-0 overflow-hidden flex flex-col"
       style={{
-        borderRight: side === "left" ? "1px solid var(--color-border)" : "none",
-        borderLeft: side === "right" ? "1px solid var(--color-border)" : "none",
+        width: `${width}px`,
+        background: "linear-gradient(180deg, var(--color-bg-base) 0%, var(--color-bg-deep) 100%)",
       }}
     >
-      <button
-        onClick={onToggle}
-        title={collapsed ? "Expand" : "Collapse"}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      {/* Panel close bar */}
+      <div
+        className="flex items-center justify-between px-3 py-1.5 shrink-0"
+        style={{
+          background: "var(--color-bg-elevated)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
       >
-        <CollapseIcon size={16} />
-      </button>
-      <div className="w-6 my-1" style={{ borderTop: "1px solid var(--color-border)" }} />
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        return (
-          <button
-            key={tab.id}
-            className={activeTab === tab.id ? "active" : ""}
-            onClick={() => onTabClick(tab.id)}
-            title={tab.label}
-            aria-label={tab.label}
-          >
-            <Icon size={16} />
-          </button>
-        );
-      })}
+        <span
+          className="text-[0.65rem] font-semibold uppercase tracking-wider"
+          style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
+        >
+          {title}
+        </span>
+        <button
+          onClick={onClose}
+          className="w-5 h-5 rounded flex items-center justify-center cursor-pointer transition-all duration-150"
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--color-text-muted)",
+          }}
+          aria-label="Close panel"
+        >
+          <X size={13} />
+        </button>
+      </div>
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }
 
 // ── Main Layout ──
 export default function GameLayout() {
-  const [leftCollapsed, setLeftCollapsed] = useState(false);
-  const [rightCollapsed, setRightCollapsed] = useState(false);
   const [leftTab, setLeftTab] = useState<LeftTab>("character");
   const [rightTab, setRightTab] = useState<RightTab>("npc");
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [leftSidebarExpanded, setLeftSidebarExpanded] = useState(false);
+  const [rightSidebarExpanded, setRightSidebarExpanded] = useState(false);
 
   const leftResize = useDragResize("left", 380, 200, 700);
   const rightResize = useDragResize("right", 380, 200, 700);
 
-  const handleLeftTabClick = useCallback(
-    (id: string) => {
+  // Clicking a nav item: open the panel, collapse sidebar
+  const handleLeftItemClick = (id: string) => {
+    if (leftPanelOpen && leftTab === id) {
+      setLeftPanelOpen(false);
+    } else {
       setLeftTab(id as LeftTab);
-      if (leftCollapsed) setLeftCollapsed(false);
-    },
-    [leftCollapsed],
-  );
+      setLeftPanelOpen(true);
+      setLeftSidebarExpanded(false);
+    }
+  };
 
-  const handleRightTabClick = useCallback(
-    (id: string) => {
+  const handleRightItemClick = (id: string) => {
+    if (rightPanelOpen && rightTab === id) {
+      setRightPanelOpen(false);
+    } else {
       setRightTab(id as RightTab);
-      if (rightCollapsed) setRightCollapsed(false);
-    },
-    [rightCollapsed],
-  );
+      setRightPanelOpen(true);
+      setRightSidebarExpanded(false);
+    }
+  };
+
+  // Toggle sidebar expand: when expanding, close panel
+  const handleLeftToggleExpand = () => {
+    const next = !leftSidebarExpanded;
+    setLeftSidebarExpanded(next);
+    if (next) setLeftPanelOpen(false);
+  };
+
+  const handleRightToggleExpand = () => {
+    const next = !rightSidebarExpanded;
+    setRightSidebarExpanded(next);
+    if (next) setRightPanelOpen(false);
+  };
 
   const renderLeftContent = () => {
     switch (leftTab) {
@@ -242,28 +266,27 @@ export default function GameLayout() {
       <TopBar />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Icon Strip */}
-        <IconStrip
-          tabs={leftTabs}
-          activeTab={leftTab}
-          onTabClick={handleLeftTabClick}
-          collapsed={leftCollapsed}
-          onToggle={() => setLeftCollapsed((p) => !p)}
+        {/* Left Sidebar Navigation */}
+        <GameSidebar
+          items={leftNavItems}
+          activeItem={leftTab}
+          panelOpen={leftPanelOpen}
+          expanded={leftSidebarExpanded}
+          onItemClick={handleLeftItemClick}
+          onToggleExpand={handleLeftToggleExpand}
           side="left"
         />
 
-        {/* Left Sidebar */}
-        {!leftCollapsed && (
+        {/* Left Panel Content */}
+        {leftPanelOpen && (
           <>
-            <div
-              className="shrink-0 overflow-hidden flex flex-col"
-              style={{
-                width: `${leftResize.width}px`,
-                background: "linear-gradient(180deg, var(--color-bg-base) 0%, var(--color-bg-deep) 100%)",
-              }}
+            <PanelWrapper
+              title={leftTabLabels[leftTab] ?? leftTab}
+              onClose={() => setLeftPanelOpen(false)}
+              width={leftResize.width}
             >
               {renderLeftContent()}
-            </div>
+            </PanelWrapper>
             <ResizeHandle onMouseDown={leftResize.onMouseDown} />
           </>
         )}
@@ -276,29 +299,28 @@ export default function GameLayout() {
           <NarrativePanel />
         </div>
 
-        {/* Right Sidebar */}
-        {!rightCollapsed && (
+        {/* Right Panel Content */}
+        {rightPanelOpen && (
           <>
             <ResizeHandle onMouseDown={rightResize.onMouseDown} />
-            <div
-              className="shrink-0 overflow-hidden flex flex-col"
-              style={{
-                width: `${rightResize.width}px`,
-                background: "linear-gradient(180deg, var(--color-bg-base) 0%, var(--color-bg-deep) 100%)",
-              }}
+            <PanelWrapper
+              title={rightTabLabels[rightTab] ?? rightTab}
+              onClose={() => setRightPanelOpen(false)}
+              width={rightResize.width}
             >
               {renderRightContent()}
-            </div>
+            </PanelWrapper>
           </>
         )}
 
-        {/* Right Icon Strip */}
-        <IconStrip
-          tabs={rightTabs}
-          activeTab={rightTab}
-          onTabClick={handleRightTabClick}
-          collapsed={rightCollapsed}
-          onToggle={() => setRightCollapsed((p) => !p)}
+        {/* Right Sidebar Navigation */}
+        <GameSidebar
+          items={rightNavItems}
+          activeItem={rightTab}
+          panelOpen={rightPanelOpen}
+          expanded={rightSidebarExpanded}
+          onItemClick={handleRightItemClick}
+          onToggleExpand={handleRightToggleExpand}
           side="right"
         />
       </div>

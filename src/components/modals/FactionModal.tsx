@@ -6,6 +6,8 @@ import {
   X, Flag, MapPin, Crown, Target, Users, BookOpen, Handshake,
 } from "lucide-react";
 import { type Faction, factions } from "@/data/placeholder";
+import { GlassHighlight, GlassLinkRow } from "@/components/ui/glass";
+import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
 
 const stanceColors: Record<string, string> = {
   Allied: "var(--color-success)",
@@ -145,114 +147,66 @@ export default function FactionModal({
 
             {/* Info grid */}
             <div className="grid grid-cols-2 gap-2">
-              <div
-                className="px-3 py-2 rounded-md"
-                style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-              >
-                <div className="flex items-center gap-1.5 mb-1">
-                  <MapPin size={10} className="text-[var(--color-text-muted)]" />
-                  <span className="text-[0.6rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Territory</span>
-                </div>
-                <p className="text-[0.65rem] text-[var(--color-text-secondary)]">{faction.territory}</p>
-              </div>
-              <div
-                className="px-3 py-2 rounded-md"
-                style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-              >
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Crown size={10} className="text-[var(--color-text-muted)]" />
-                  <span className="text-[0.6rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Leader</span>
-                </div>
-                <p className="text-[0.65rem] text-[var(--color-text-secondary)]">{faction.leader}</p>
-              </div>
+              <GlassHighlight title="Territory" accentColor={faction.color}>
+                {faction.territory}
+              </GlassHighlight>
+              <GlassHighlight title="Leader" accentColor={faction.color}>
+                {faction.leader}
+              </GlassHighlight>
             </div>
 
             {/* Goals */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Target size={11} className="text-[var(--color-text-muted)]" />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Goals</span>
-              </div>
+            <GlassHighlight title="Goals" accentColor={faction.color}>
               <div className="space-y-1">
                 {faction.goals.map((goal, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 px-2.5 py-1.5 rounded-md text-[0.65rem]"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
+                  <div key={i} className="flex items-start gap-2 text-[0.6rem]">
                     <span className="mt-0.5 shrink-0" style={{ color: faction.color }}>•</span>
-                    <span className="text-[var(--color-text-secondary)]">{goal}</span>
+                    <span>{goal}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </GlassHighlight>
 
             {/* Known Members */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Users size={11} className="text-[var(--color-text-muted)]" />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Known Members</span>
-              </div>
-              <div className="space-y-1">
+            <GlassHighlight title="Known Members" accentColor={faction.color}>
+              <ChipRow>
                 {faction.knownMembers.map((member) => (
-                  <div
-                    key={member}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[0.65rem]"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
-                    <Users size={10} style={{ color: faction.color }} />
-                    <span className="text-[var(--color-text-secondary)]">{member}</span>
-                  </div>
+                  <AvatarChip key={member} label={member} variant="custom" customColor={faction.color} size="sm" icon={<Users size={10} />} />
                 ))}
-              </div>
-            </div>
+              </ChipRow>
+            </GlassHighlight>
 
             {/* Faction Relationships */}
             <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Handshake size={11} className="text-[var(--color-text-muted)]" />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Relations</span>
-              </div>
-              <div className="space-y-1">
+              <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] mb-2" style={{ color: "var(--color-text-muted)" }}>Relations</p>
+              <div className="space-y-1.5">
                 {faction.relationships.map((rel) => {
                   const otherFaction = factions.find((f) => f.name === rel.faction);
                   const stanceColor = stanceColors[rel.stance] ?? "var(--color-text-muted)";
                   return (
-                    <div
+                    <GlassLinkRow
                       key={rel.faction}
-                      className="flex items-center justify-between px-2.5 py-1.5 rounded-md"
-                      style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full" style={{ background: otherFaction?.color ?? "var(--color-text-muted)" }} />
-                        <span className="text-[0.65rem] text-[var(--color-text-secondary)]">{rel.faction}</span>
-                      </div>
-                      <span className="text-[0.6rem] font-medium" style={{ color: stanceColor }}>{rel.stance}</span>
-                    </div>
+                      icon={<Flag size={12} style={{ color: otherFaction?.color ?? "var(--color-text-muted)" }} />}
+                      label={rel.faction}
+                      detail={rel.stance}
+                      accentColor={stanceColor}
+                    />
                   );
                 })}
               </div>
             </div>
 
             {/* Player History */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <BookOpen size={11} className="text-[var(--color-text-muted)]" />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Your History</span>
-              </div>
+            <GlassHighlight title="Your History">
               <div className="space-y-1">
                 {faction.playerHistory.map((event, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 px-2.5 py-1.5 rounded-md text-[0.65rem]"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
-                    <span className="mt-0.5 shrink-0 text-[var(--color-gold)]">•</span>
-                    <span className="text-[var(--color-text-secondary)]">{event}</span>
+                  <div key={i} className="flex items-start gap-2 text-[0.6rem]">
+                    <span className="mt-0.5 shrink-0" style={{ color: "var(--color-gold)" }}>•</span>
+                    <span>{event}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </GlassHighlight>
 
           </div>
         </div>

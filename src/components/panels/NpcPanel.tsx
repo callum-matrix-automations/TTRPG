@@ -10,6 +10,7 @@ import {
   type BackgroundNpc,
 } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
+import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
 
 const dispositionColor = (d: number) => {
   const hue = ((d + 100) / 200) * 120;
@@ -22,78 +23,7 @@ const tierLabel: Record<string, { label: string; color: string }> = {
   background: { label: "Background", color: "var(--color-text-muted)" },
 };
 
-// ── NPC Selector ──
-function NpcSelector({
-  npcs,
-  selectedId,
-  onSelect,
-}: {
-  npcs: SceneNpc[];
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) {
-  // Only show non-background NPCs in the selector
-  const selectableNpcs = npcs.filter((n) => n.tier !== "background");
-  if (selectableNpcs.length <= 1) return null;
-
-  return (
-    <div
-      className="flex gap-2 px-3 py-2 overflow-x-auto shrink-0"
-      style={{
-        borderBottom: "1px solid var(--color-border)",
-        background: "linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%)",
-      }}
-    >
-      {selectableNpcs.map((npc) => {
-        const isSelected = npc.id === selectedId;
-        return (
-          <button
-            key={npc.id}
-            onClick={() => onSelect(npc.id)}
-            className="flex flex-col items-center gap-1 shrink-0 cursor-pointer transition-all duration-150"
-            style={{ opacity: isSelected ? 1 : 0.5 }}
-            title={npc.name}
-            aria-label={npc.name}
-          >
-            <div className="relative">
-              <div
-                className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-all duration-150"
-                style={{
-                  border: `2px solid ${isSelected ? npc.factionColor : "var(--color-border)"}`,
-                  boxShadow: isSelected ? `0 0 10px ${npc.factionColor}44` : "none",
-                  background: "var(--color-bg-deep)",
-                }}
-              >
-                {npc.portrait ? (
-                  <img src={npc.portrait} alt={npc.name} className="w-full h-full object-cover" />
-                ) : (
-                  <HelpCircle size={16} style={{ color: "var(--color-text-muted)" }} />
-                )}
-              </div>
-              {/* Tier dot */}
-              <div
-                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
-                style={{
-                  borderColor: "var(--color-bg-base)",
-                  background: tierLabel[npc.tier]?.color ?? "var(--color-text-muted)",
-                }}
-              />
-            </div>
-            <span
-              className="text-[0.55rem] max-w-[56px] truncate"
-              style={{
-                color: isSelected ? npc.factionColor : "var(--color-text-muted)",
-                fontWeight: isSelected ? 600 : 400,
-              }}
-            >
-              {npc.name.split(" ")[0]}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// NpcSelector removed — now using NpcAvatars component
 
 // ── Active NPC Detail ──
 function ActiveNpcDetail({ npc }: { npc: ActiveNpc }) {
@@ -407,8 +337,24 @@ export default function NpcPanel() {
         </span>
       </div>
 
-      {/* NPC Selector */}
-      <NpcSelector npcs={sceneNpcs} selectedId={selectedId} onSelect={setSelectedId} />
+      {/* NPC Selector — Chips */}
+      {nonBackground.length > 1 && (
+        <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--color-border)", background: "linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%)" }}>
+          <ChipRow>
+            {nonBackground.map((npc) => (
+              <AvatarChip
+                key={npc.id}
+                label={npc.name}
+                portrait={npc.portrait}
+                variant={selectedId === npc.id ? "custom" : "default"}
+                customColor={npc.factionColor}
+                size="sm"
+                onClick={() => setSelectedId(npc.id)}
+              />
+            ))}
+          </ChipRow>
+        </div>
+      )}
 
       {/* Selected NPC Detail */}
       <div className="flex-1 overflow-y-auto">

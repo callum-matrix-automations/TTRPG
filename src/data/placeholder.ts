@@ -274,7 +274,96 @@ export type SceneNpc = BackgroundNpc | PassiveNpc | ActiveNpc | CompanionNpc;
 
 // ── Companions ──
 
-export const companions: CompanionNpc[] = [];
+export const companions: CompanionNpc[] = [
+  {
+    id: "npc-tourist-companion",
+    name: "Dave Kowalski",
+    tier: "companion",
+    faction: "None",
+    factionRank: "Fellow Guest",
+    factionColor: "#8a6a8a",
+    portrait: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80",
+    status: "alive",
+    disposition: 55,
+    dispositionLabel: "Cautious Ally",
+    traits: ["Nervous", "Resourceful", "Paranoid"],
+    appearance: {
+      face: "Tired eyes, two-day stubble, worry lines",
+      hair: "Sandy brown, thinning, unkempt",
+      body: "Average build, slightly overweight",
+      notable: "Constantly glancing over his shoulder",
+    },
+    detailedAppearance: {
+      gender: "Male",
+      height: "5'9\"",
+      hair: "Sandy brown, thinning and unkempt",
+      face: "Tired eyes, two-day stubble, deep worry lines",
+      eyes: "Hazel, bloodshot, darting",
+      lips: "Dry, chapped",
+      makeup: "None",
+      skin: "Pale, slightly clammy",
+      chest: "Average male build",
+      waist: "Soft around the middle",
+      hips: "Normal male proportions",
+      ass: "Normal",
+      handsAndNails: "Bitten nails, fidgety hands",
+      legs: "Average",
+      feet: "Size 10, worn sneakers",
+      voice: "Slightly hoarse, speaks in hushed tones",
+      posture: "Hunched, defensive, always near exits",
+      speech: "Rapid, clipped sentences. Interrupts himself. Nervous filler words.",
+      overall: "A disheveled man who looks like he hasn't slept in days. He knows something about this place.",
+    },
+    transformation: {
+      active: true,
+      factionId: "casino-royale",
+      factionName: "Casino Royale",
+      factionColor: "#daa520",
+      identity: 71,
+      willpower: 65,
+      conditioning: 18,
+      currentThreshold: 1,
+      thresholdName: "Initial Imprint",
+      overallProgress: 12,
+      physicalChanges: [
+        { bodyPart: "Skin", before: "Pale, normal", current: "Slightly smoother, faint warmth", changePercent: 10, source: "casino-royale", stage: 1 },
+        { bodyPart: "Hair", before: "Sandy brown, thinning", current: "Slightly thicker, subtle shine", changePercent: 8, source: "casino-royale", stage: 1 },
+      ],
+      assignedTemplate: null,
+    },
+    race: "Human",
+    class: "Civilian",
+    level: 1,
+    hp: { current: 15, max: 18 },
+    xp: 50,
+    stats: {
+      STR: { score: 10, mod: 0 },
+      DEX: { score: 11, mod: 0 },
+      CON: { score: 12, mod: 1 },
+      INT: { score: 14, mod: 2 },
+      WIS: { score: 13, mod: 1 },
+      CHA: { score: 9, mod: -1 },
+    },
+    skills: [
+      { name: "Investigation", ability: "INT", proficient: true, mod: 4 },
+      { name: "Perception", ability: "WIS", proficient: true, mod: 3 },
+      { name: "Stealth", ability: "DEX", proficient: false, mod: 0 },
+    ],
+    abilities: [
+      { name: "Paranoid Vigilance", description: "Advantage on Perception checks to detect being followed or watched." },
+    ],
+    statusEffects: [
+      { name: "Sleep Deprived", type: "debuff" as const, description: "Disadvantage on CHA checks. -1 to WIS saves." },
+    ],
+    gear: [
+      { slot: "Top", item: "Wrinkled polo shirt" },
+      { slot: "Bottoms", item: "Khaki shorts" },
+      { slot: "Footwear", item: "Worn sneakers" },
+    ],
+    loyalty: 55,
+    joinedAt: "Casino Royale — Main Floor Bar",
+  },
+];
 
 // ── Scene NPCs (Casino Royale) ──
 

@@ -3,6 +3,7 @@
 import { Shield, Star, AlertTriangle, Dna } from "lucide-react";
 import { transformation, playerCharacter } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
+import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
 
 export default function TransformationPanel() {
   const t = transformation;
@@ -127,25 +128,17 @@ export default function TransformationPanel() {
             <h4 className="text-[0.65rem] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
               Physical Changes
             </h4>
-            <div className="space-y-1">
+            <ChipRow>
               {t.physicalChanges.map((change) => (
-                <div
+                <AvatarChip
                   key={change.bodyPart}
-                  className="card"
-                  style={{ borderLeft: `2px solid ${t.factionColor}` }}
-                >
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[0.65rem] font-medium text-[var(--color-text-primary)]">{change.bodyPart}</span>
-                    <span className="stat-value text-[0.6rem]">{change.changePercent}%</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[0.55rem]">
-                    <span className="text-[var(--color-text-muted)] line-through">{change.before}</span>
-                    <span className="text-[var(--color-text-muted)]">→</span>
-                    <span style={{ color: t.factionColor ?? "var(--color-gold)" }}>{change.current}</span>
-                  </div>
-                </div>
+                  label={`${change.bodyPart} ${change.changePercent}%`}
+                  variant="custom"
+                  customColor={t.factionColor ?? "var(--color-gold)"}
+                  size="sm"
+                />
               ))}
-            </div>
+            </ChipRow>
           </div>
         )}
 

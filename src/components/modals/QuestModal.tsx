@@ -7,6 +7,7 @@ import {
   MapPin, User, BookOpen, StickyNote, Flag, ChevronRight,
 } from "lucide-react";
 import { type Quest } from "@/data/placeholder";
+import { GlassHighlight } from "@/components/ui/glass";
 
 const statusConfig: Record<string, { color: string; label: string; bg: string }> = {
   active: { color: "var(--color-gold)", label: "Active", bg: "var(--color-gold-subtle)" },
@@ -123,139 +124,73 @@ export default function QuestModal({
             </p>
 
             {/* Lore */}
-            <div
-              className="rounded-lg p-3"
-              style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-            >
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <BookOpen size={11} style={{ color: "var(--color-purple-light)" }} />
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Lore</span>
-              </div>
-              <p className="text-[0.65rem] leading-relaxed text-[var(--color-text-secondary)] italic">
-                {quest.lore}
-              </p>
-            </div>
+            <GlassHighlight title="Lore" accentColor="var(--color-purple-light)">
+              <p className="italic">{quest.lore}</p>
+            </GlassHighlight>
 
             {/* Objectives */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  Objectives
-                </span>
-                <span className="stat-value text-[0.6rem]">
-                  {completedCount}/{quest.objectives.length}
-                </span>
-              </div>
-              {/* Progress bar */}
+            <GlassHighlight title={`Objectives (${completedCount}/${quest.objectives.length})`} accentColor={status.color}>
               <div className="progress-bar-bg mb-2">
-                <div
-                  className="progress-bar-fill"
-                  style={{
-                    width: `${(completedCount / quest.objectives.length) * 100}%`,
-                    background: status.color,
-                    boxShadow: `0 0 6px ${status.color}44`,
-                  }}
-                />
+                <div className="progress-bar-fill" style={{ width: `${(completedCount / quest.objectives.length) * 100}%`, background: status.color, boxShadow: `0 0 6px ${status.color}44` }} />
               </div>
               <div className="space-y-1">
                 {quest.objectives.map((obj, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 px-2.5 py-1.5 rounded-md"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
+                  <div key={i} className="flex items-start gap-2 text-[0.6rem]">
                     {obj.completed ? (
-                      <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                      <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
                     ) : (
-                      <Circle size={13} className="mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
+                      <Circle size={12} className="mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
                     )}
-                    <span
-                      className={`text-xs ${obj.completed ? "line-through text-[var(--color-text-muted)]" : "text-[var(--color-text-secondary)]"}`}
-                    >
-                      {obj.text}
+                    <span className={obj.completed ? "line-through text-[var(--color-text-muted)]" : ""}>{obj.text}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassHighlight>
+
+            {/* Rewards */}
+            <GlassHighlight title="Rewards">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="flex items-center gap-2 text-[0.6rem]">
+                  <Star size={13} className="text-[var(--color-xp)]" />
+                  <span className="stat-value text-sm">{quest.rewards.xp}</span>
+                  <span style={{ color: "var(--color-text-muted)" }}>XP</span>
+                </div>
+                {quest.rewards.gold > 0 && (
+                  <div className="flex items-center gap-2 text-[0.6rem]">
+                    <Coins size={13} className="text-[var(--color-gold)]" />
+                    <span className="stat-value text-sm">${quest.rewards.gold}</span>
+                  </div>
+                )}
+                {quest.rewards.items.map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-[0.6rem]">
+                    <Trophy size={13} className="text-[var(--color-purple-light)]" />
+                    <span style={{ color: "var(--color-purple-light)" }}>{item}</span>
+                  </div>
+                ))}
+                {quest.rewards.reputation.map((rep) => (
+                  <div key={rep.faction} className="flex items-center gap-2 text-[0.6rem]">
+                    <Flag size={13} style={{ color: rep.change >= 0 ? "var(--color-success)" : "var(--color-danger)" }} />
+                    <span>{rep.faction}</span>
+                    <span className="stat-value" style={{ color: rep.change >= 0 ? "var(--color-success)" : "var(--color-danger)" }}>
+                      {rep.change >= 0 ? `+${rep.change}` : rep.change}
                     </span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Rewards */}
-            <div>
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Rewards
-              </span>
-              <div className="grid grid-cols-2 gap-1.5 mt-2">
-                <div
-                  className="flex items-center gap-2 px-2.5 py-2 rounded-md"
-                  style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                >
-                  <Star size={14} className="text-[var(--color-xp)]" />
-                  <div>
-                    <span className="stat-value text-sm">{quest.rewards.xp}</span>
-                    <span className="text-[0.6rem] text-[var(--color-text-muted)] ml-1">XP</span>
-                  </div>
-                </div>
-                <div
-                  className="flex items-center gap-2 px-2.5 py-2 rounded-md"
-                  style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                >
-                  <Coins size={14} className="text-[var(--color-gold)]" />
-                  <div>
-                    <span className="stat-value text-sm">{quest.rewards.gold}</span>
-                    <span className="text-[0.6rem] text-[var(--color-text-muted)] ml-1">gp</span>
-                  </div>
-                </div>
-                {quest.rewards.items.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-2 px-2.5 py-2 rounded-md"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
-                    <Trophy size={14} className="text-[var(--color-purple-light)]" />
-                    <span className="text-xs text-[var(--color-purple-light)]">{item}</span>
-                  </div>
-                ))}
-                {quest.rewards.reputation.map((rep) => (
-                  <div
-                    key={rep.faction}
-                    className="flex items-center gap-2 px-2.5 py-2 rounded-md"
-                    style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                  >
-                    <Flag size={14} style={{ color: rep.change >= 0 ? "var(--color-success)" : "var(--color-danger)" }} />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[0.6rem] text-[var(--color-text-secondary)] truncate block">{rep.faction}</span>
-                      <span
-                        className="stat-value text-[0.65rem]"
-                        style={{ color: rep.change >= 0 ? "var(--color-success)" : "var(--color-danger)" }}
-                      >
-                        {rep.change >= 0 ? `+${rep.change}` : rep.change}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </GlassHighlight>
 
             {/* Notes */}
             {quest.notes.length > 0 && (
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <StickyNote size={11} className="text-[var(--color-text-muted)]" />
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Notes</span>
-                </div>
+              <GlassHighlight title="Notes">
                 <div className="space-y-1">
                   {quest.notes.map((note, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2 px-2.5 py-1.5 rounded-md text-[0.65rem]"
-                      style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-subtle)" }}
-                    >
-                      <ChevronRight size={10} className="mt-0.5 shrink-0 text-[var(--color-gold)]" />
-                      <span className="text-[var(--color-text-secondary)]">{note}</span>
+                    <div key={i} className="flex items-start gap-2 text-[0.6rem]">
+                      <ChevronRight size={10} className="mt-0.5 shrink-0" style={{ color: "var(--color-gold)" }} />
+                      <span>{note}</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </GlassHighlight>
             )}
           </div>
         </div>

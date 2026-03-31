@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Heart, Star, BookOpen, EyeOff, Eye, Sparkles, ChevronDown, Info, Zap } from "lucide-react";
 import { playerCharacter, transformation } from "@/data/placeholder";
 import AppearanceView from "@/components/shared/AppearanceView";
+import { AvatarChip, ChipRow } from "@/components/ui/avatar-chip";
 
 // ── Collapsible Drawer ──
 function Drawer({
@@ -407,46 +408,17 @@ export default function CharacterSheet() {
           {pc.statusEffects.length === 0 ? (
             <p className="text-[0.65rem] text-[var(--color-text-muted)] italic">No active effects</p>
           ) : (
-            <div className="space-y-1.5">
-              {pc.statusEffects.map((effect) => {
-                const isBuff = effect.type === "buff";
-                const accentColor = isBuff ? "var(--color-success)" : "var(--color-danger)";
-                return (
-                  <div
-                    key={effect.name}
-                    className="card"
-                    style={{ borderLeft: `3px solid ${accentColor}` }}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      {effect.icon === "eye-off" && <EyeOff size={11} style={{ color: accentColor }} />}
-                      {effect.icon === "eye" && <Eye size={11} style={{ color: accentColor }} />}
-                      {!["eye-off", "eye"].includes(effect.icon) && (
-                        <Sparkles size={11} style={{ color: accentColor }} />
-                      )}
-                      <span className="text-xs font-medium" style={{ color: accentColor }}>
-                        {effect.name}
-                      </span>
-                      <span
-                        className="ml-auto badge"
-                        style={{
-                          background: isBuff ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
-                          color: accentColor,
-                          border: `1px solid ${accentColor}44`,
-                        }}
-                      >
-                        {effect.type}
-                      </span>
-                    </div>
-                    <p className="text-[0.6rem] text-[var(--color-text-secondary)] leading-relaxed">
-                      {effect.description}
-                    </p>
-                    <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-1">
-                      {effect.duration}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+            <ChipRow>
+              {pc.statusEffects.map((effect) => (
+                <AvatarChip
+                  key={effect.name}
+                  label={effect.name}
+                  variant={effect.type === "buff" ? "success" : "danger"}
+                  icon={<Sparkles size={10} />}
+                  size="sm"
+                />
+              ))}
+            </ChipRow>
           )}
         </Drawer>
 

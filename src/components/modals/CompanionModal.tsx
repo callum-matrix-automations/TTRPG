@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, Heart, Star, Shield, Zap, Footprints, BookOpen, Eye, HelpCircle, Flag, ChevronDown } from "lucide-react";
 import { type CompanionNpc } from "@/data/placeholder";
+import AppearanceModal from "./AppearanceModal";
 
 // ── Collapsible Drawer (reused pattern) ──
 function Drawer({
@@ -57,6 +58,7 @@ export default function CompanionModal({
   const backdropRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
 
   const hpPercent = (npc.hp.current / npc.hp.max) * 100;
   const hpColor = hpPercent > 50 ? "var(--color-success)" : hpPercent > 25 ? "var(--color-gold)" : "var(--color-danger)";
@@ -80,7 +82,7 @@ export default function CompanionModal({
 
   const isOpen = visible && !closing;
 
-  return createPortal(
+  return <>{createPortal(
     <div
       ref={backdropRef}
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -239,14 +241,19 @@ export default function CompanionModal({
               )}
             </Drawer>
 
-            {/* Appearance */}
-            <Drawer title="Appearance">
-              <div className="space-y-1 text-[0.7rem] text-[var(--color-text-secondary)]">
-                {Object.entries(npc.appearance).map(([key, val]) => (
-                  <p key={key}><span className="text-[var(--color-pink-dim)] capitalize">{key}:</span> {val}</p>
-                ))}
-              </div>
-            </Drawer>
+            {/* Appearance — opens full modal */}
+            <button
+              onClick={() => setAppearanceOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-[0.7rem] font-medium cursor-pointer transition-all duration-150"
+              style={{
+                background: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              <Eye size={13} />
+              View Full Appearance
+            </button>
 
             {/* Loyalty + Joined */}
             <div className="flex items-center justify-between text-[0.6rem] text-[var(--color-text-muted)] pt-1" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
@@ -258,5 +265,15 @@ export default function CompanionModal({
       </div>
     </div>,
     document.body,
-  );
+  )}
+  {appearanceOpen && npc.detailedAppearance && (
+    <AppearanceModal
+      appearance={npc.detailedAppearance}
+      transformation={npc.transformation}
+      name={npc.name}
+      portrait={npc.portrait}
+      onClose={() => setAppearanceOpen(false)}
+    />
+  )}
+  </>;
 }

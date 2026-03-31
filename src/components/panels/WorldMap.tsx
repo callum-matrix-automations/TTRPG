@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Map, MapPin, Clock, Zap, AlertTriangle, Lock, ChevronRight, Navigation, Maximize2, ChevronLeft, X } from "lucide-react";
+import { Map, MapPin, Clock, Zap, AlertTriangle, Lock, ChevronRight, Navigation, Maximize2, ChevronLeft, X, Compass } from "lucide-react";
 import { mapLocations, type MapLocation, type LocationDepth } from "@/data/placeholder";
+import { HoverRevealCard, RevealRow } from "@/components/ui/hover-reveal-card";
 import dynamic from "next/dynamic";
 
 const PhaserMapCanvas = dynamic(() => import("@/game/PhaserMapCanvas"), { ssr: false });
@@ -14,44 +15,83 @@ const dangerLabels = ["Safe", "Low", "Moderate", "High"];
 function LocationCard({
   location,
   onSelect,
-  selected,
 }: {
   location: MapLocation;
   onSelect: () => void;
-  selected: boolean;
 }) {
   const isHere = location.playerIsHere;
   const isRestricted = !!location.restricted;
+  const exits = location.connections.filter((c) => c.discovered);
+
+  if (!location.discovered) {
+    return (
+      <div className="card" style={{ opacity: 0.4 }}>
+        <span className="text-xs text-[var(--color-text-muted)]">???</span>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`card cursor-pointer transition-all duration-150 ${isHere ? "gold-border-glow" : ""}`}
-      style={{
-        borderLeft: `3px solid ${location.factionColor ?? "var(--color-border)"}`,
-        opacity: location.discovered ? 1 : 0.4,
-        background: selected ? "var(--color-bg-surface)" : undefined,
-      }}
+    <HoverRevealCard
+      accentColor={location.factionColor ?? "var(--color-text-muted)"}
+      footerIcon={isHere ? <Navigation size={11} /> : <Compass size={11} />}
+      footerLabel={isHere ? "Current Location" : dangerLabels[location.dangerLevel]}
+      footerActionLabel={isHere ? "You Are Here" : "Select"}
+      footerAction={onSelect}
       onClick={onSelect}
-    >
-      <div className="flex items-center gap-2">
-        {isHere && <Navigation size={11} style={{ color: "var(--color-gold)" }} />}
-        <span
-          className="text-xs font-medium flex-1 truncate"
-          style={{ color: isHere ? "var(--color-gold)" : "var(--color-text-primary)" }}
-        >
-          {location.discovered ? location.name : "???"}
-        </span>
-        <div className="flex items-center gap-1">
-          {isRestricted && <Lock size={10} className="text-[var(--color-danger)]" />}
-          <div className="w-2 h-2 rounded-full" style={{ background: dangerColors[location.dangerLevel] }} />
+      summary={
+        <div className="flex items-center gap-2">
+          {isHere && <Navigation size={11} style={{ color: "var(--color-gold)" }} />}
+          <span className="text-xs font-medium flex-1 truncate" style={{ color: isHere ? "var(--color-gold)" : "var(--color-text-primary)" }}>
+            {location.name}
+          </span>
+          <div className="flex items-center gap-1">
+            {isRestricted && <Lock size={9} style={{ color: "var(--color-danger)" }} />}
+            <div className="w-2 h-2 rounded-full" style={{ background: dangerColors[location.dangerLevel] }} />
+          </div>
         </div>
-      </div>
-      {location.discovered && (
-        <p className="text-[0.55rem] text-[var(--color-text-muted)] mt-0.5 line-clamp-1">
-          {location.description}
-        </p>
-      )}
-    </div>
+      }
+      details={
+        <>
+          {/* Full description */}
+          <RevealRow>
+            <p className="text-[0.6rem] text-[var(--color-text-secondary)] leading-relaxed">
+              {location.description}
+            </p>
+          </RevealRow>
+
+          {/* Exits */}
+          {exits.length > 0 && (
+            <RevealRow>
+              <span className="text-[0.55rem] font-semibold uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>Exits</span>
+              <div className="space-y-0.5 mt-1">
+                {exits.map((conn) => {
+                  const target = mapLocations.find((l) => l.id === conn.targetId);
+                  return (
+                    <div key={conn.targetId} className="flex items-center justify-between text-[0.55rem] px-1.5 py-0.5 rounded" style={{ background: "var(--color-bg-deep)" }}>
+                      <div className="flex items-center gap-1">
+                        <ChevronRight size={8} style={{ color: conn.accessible ? "var(--color-gold)" : "var(--color-danger)" }} />
+                        <span className="text-[var(--color-text-secondary)]">{target?.name ?? conn.targetId}</span>
+                      </div>
+                      <span style={{ color: "var(--color-text-muted)" }}>{conn.travelMinutes}m</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </RevealRow>
+          )}
+
+          {/* Restricted warning */}
+          {isRestricted && (
+            <RevealRow>
+              <div className="flex items-center gap-1 text-[0.55rem]" style={{ color: "var(--color-danger)" }}>
+                <Lock size={9} /> Restricted: {location.restricted?.condition}
+              </div>
+            </RevealRow>
+          )}
+        </>
+      }
+    />
   );
 }
 
@@ -240,7 +280,6 @@ export default function WorldMap() {
             <LocationCard
               key={loc.id}
               location={loc}
-              selected={loc.id === selectedLocationId}
               onSelect={() => handleLocationClick(loc.id)}
             />
           ))}

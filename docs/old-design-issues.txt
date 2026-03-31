@@ -42,3 +42,5 @@ We can actually build a full world that isn't just the casino if we close source
 
 I think a mechanic that handles transformation should be created, it's such a major theme that it deserves it.
 
+Gemini as a model handles character personality way better than Claude does. Claude might be better in a strategic role
+where it is doing more logic based stuff, anything that requires actual creativity should be done by Gemini.

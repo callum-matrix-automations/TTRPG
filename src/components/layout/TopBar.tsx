@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { worldState, resources, clocks, gamePhase, type GamePhase } from "@/data/placeholder";
 import RestModal from "@/components/modals/RestModal";
+import { ClockPillars } from "@/components/ui/clock-pillars";
 
 const phaseConfig: Record<GamePhase, { label: string; icon: typeof Play; color: string }> = {
   player_action: { label: "Your Turn", icon: Play, color: "var(--color-gold)" },
@@ -65,30 +66,19 @@ function ClockTooltip({
 
         {/* Name */}
         <p
-          className="text-xs font-semibold mb-1"
+          className="text-xs font-semibold mb-3"
           style={{ fontFamily: "var(--font-heading)", color: "var(--color-pink-light)" }}
         >
           {clock.name}
         </p>
 
-        {/* Progress */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex gap-0.5">
-            {Array.from({ length: clock.segments }).map((_, i) => (
-              <div
-                key={i}
-                className="w-3 h-3 rounded-sm border"
-                style={{
-                  borderColor: "var(--color-border-strong)",
-                  background: i < clock.filled ? config.color : "var(--color-bg-deep)",
-                  boxShadow: i < clock.filled ? `0 0 4px ${config.color}66` : "none",
-                }}
-              />
-            ))}
-          </div>
-          <span className="stat-value text-[0.65rem]">
-            {clock.filled}/{clock.segments}
-          </span>
+        {/* Pillar Visualization */}
+        <div className="flex justify-center mb-3">
+          <ClockPillars
+            segments={clock.segments}
+            filled={clock.filled}
+            type={clock.type}
+          />
         </div>
 
         {/* Description */}
